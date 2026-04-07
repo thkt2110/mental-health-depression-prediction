@@ -1,0 +1,111 @@
+--- TRANG 1 ---
+CSC17001 | Intelligent Data Analytics
+Lab Description
+Lab Description
+Exploring Mental Health Data
+1
+Introduction
+This project is inspired by the Kaggle competition Exploring Mental Health Data (Kaggle Link).
+The main objective of the competition is to use data from a mental health survey to explore factors
+that may cause individuals to experience depression. Participants are required to build models
+that predict whether a person suffers from depression based on the provided features.
+Participants are required to:
+• Join the above Kaggle competition using a registered account name that follows the format
+HCMUS-22KHDL-YourTeamName.
+• Download the provided dataset, explore the mental health survey data, and then develop a
+machine learning model to predict the target variable Depression.
+• Submit the predictions to Kaggle and record the obtained results.
+2
+Submission
+Your report and source code must be submitted in a compressed ZIP file (.zip extension) named
+according to the format TeamName.zip. If the compressed file is larger than 25MB, you may
+upload it to Google Drive and provide a text file with the public shared link (absolutely no
+modifications are allowed after the deadline).
+2.1
+Source Code (Jupyter Notebook(s))
+Your source code, results should be reported in Jupyter Notebooks with the following requirements:
+• Provide detailed explanations for each step with illustrative images, diagrams, and equations.
+• Fully comment every processing step, and print intermediate results for observation.
+• Ensure the notebooks are well-formatted.
+• Before submitting, re-run the notebook (Kernel →Restart & Run All).
+Faculty of Information Technology, University of Science, VNU-HCM
+Page 1
+
+
+--- TRANG 2 ---
+CSC17001 | Intelligent Data Analytics
+Lab Description
+2.2
+Report
+Prepare a detailed report that includes:
+• Project Planning and Task Distribution: Document the team member responsibilities,
+which includes information on each task assigned to team members and the completion rate.
+E.g., Student A has percentage of completion 90% and the group work has total score of 9.0,
+then A receives a score of 9.0 * 90% = 8.1.
+Therefore, it is important to evaluate the contribution of group members fairly.
+• Project Overview: Briefly introduce the project.
+• Data Exploration: Describe the data understanding, key observations, and insights.
+• Data Preprocessing: Data cleaning, transformation, handling of missing or noisy data.
+• Feature Engineering: Present how the features were created or selected to improve the
+model performance.
+• Model Development: Summarize the models used, including parameters, architectures,
+or libraries applied. Multiple models can be used.
+• Experiments and Results: Report training and testing results, compare models, and
+provide analysis or interpretation.
+• Conclusion and Future Work: Summarize the main findings and propose directions for
+the future improvement.
+• Provide a screenshot as evidence of the results obtained from Kaggle.
+• Ensure the report is well-formatted and exported to PDF.
+• Include any references in a properly formatted bibliography section.
+2.3
+Presentation Video
+Upload a video to YouTube and provide the public link in the report:
+• Create a presentation video on your group’s methodology, and including a demonstration.
+All members must participate in the presentation. You may use either English or Vietnamese.
+• There is no duration limit. All presentation format is allowed (professional editing style, or
+record the Google Meet, etc.), but the use of AI-generated voices is strictly prohibited.
+Faculty of Information Technology, University of Science, VNU-HCM
+Page 2
+
+
+--- TRANG 3 ---
+CSC17001 | Intelligent Data Analytics
+Lab Description
+3
+Assessment
+No.
+Details
+Score
+1
+Source code
+3 points
+2
+Report
+3 points
+3
+Video
+2 points
+4
+Results on Private Score:
+2 points
+- Top 10%: 2 points
+- Top 20%: 1.5 points
+- Top 30%: 1 point
+- Top 40%: 0.5 points
+Total
+10 points
+4
+Notices
+Please pay attention to the following notices:
+• This is a GROUP assignment. Each group has 3 - 4 members.
+Groups with fewer or more members than the specified limit require lab instructor approval.
+• Duration: approximately 3 weeks.
+• AI tools are not restricted; however, students should use them wisely. Lab instructors have
+the right to conduct additional oral interviews with random groups to assess their knowledge
+of the project.
+• Any form of plagiarism, dishonesty, or misconduct will result in a grade of zero for the course.
+The end.
+Faculty of Information Technology, University of Science, VNU-HCM
+Page 3
+
+
