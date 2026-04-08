@@ -105,6 +105,17 @@ In ra `.dtypes` và `.head()` sau encoding.
 
 - **Markdown**: Giải thích mapping cho mỗi cột, lý do chọn loại encoding
 
+#### 2.5 ⚡ Bổ Sung Công Thức Chuẩn Hoá (Kiệt)
+Khi dùng `StandardScaler` hoặc `MinMaxScaler` cho numerical features, **bắt buộc** thêm công thức LaTeX trong Markdown:
+
+- **Standardization (Z-score)**:
+$$z = \frac{x - \mu}{\sigma}$$
+
+- **Min-Max Normalization**:
+$$x' = \frac{x - x_{\min}}{x_{\max} - x_{\min}}$$
+
+- **Markdown**: Giải thích khi nào dùng Standardization, khi nào dùng Min-Max. Tại sao tree-based models không cần scaling nhưng LR và SVM cần?
+
 #### 2.5 Xử Lý Outliers (nếu cần)
 - Dựa trên phát hiện từ EDA
 - Chọn strategy: clip (cap), remove, hoặc giữ nguyên
@@ -132,7 +143,12 @@ Với `City`, `Profession`, `Degree`:
 - Sử dụng Target Encoding (dùng `category_encoders.TargetEncoder` hoặc tự implement)
 - **Quan trọng**: phải dùng **cross-validation** khi fit target encoding trên train để tránh data leakage
 - In bảng: top 10 / bottom 10 giá trị encoded cho mỗi cột
-- **Markdown**: Giải thích Target Encoding là gì, tại sao dùng cho high cardinality, cách tránh leakage
+
+**⚡ Bắt buộc thêm công thức Target Encoding bằng LaTeX**:
+$$\text{TargetEnc}(c) = \frac{\sum_{i: x_i = c} y_i + \lambda \cdot \bar{y}}{n_c + \lambda}$$
+Trong đó: $n_c$ = số lần xuất hiện của category $c$, $\bar{y}$ = mean toàn bộ target, $\lambda$ = smoothing parameter.
+
+- **Markdown**: Giải thích từng ký hiệu trong công thức. Tại sao cần smoothing? Tại sao phải fit trong CV để tránh leakage?
 
 #### 3.3 Tạo Interaction Features
 Đề xuất (nhóm chọn lọc):
@@ -182,24 +198,42 @@ Train các model cơ bản làm baseline, thiết lập benchmark accuracy.
 - `StandardScaler` + `LogisticRegression`
 - 5-Fold CV
 - In kết quả: accuracy mỗi fold + mean ± std
-- **Markdown**: Nhận xét accuracy. Model tuyến tính có phù hợp với bài toán này không?
+
+**⚡ Bắt buộc thêm công thức bằng LaTeX**:
+$$\hat{y} = \sigma(\mathbf{w}^T \mathbf{x} + b) = \frac{1}{1 + e^{-(\mathbf{w}^T \mathbf{x} + b)}}$$
+$$\mathcal{L} = -\frac{1}{n}\sum_{i=1}^{n}\left[y_i \log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)\right]$$
+
+- **Markdown**: Giải thích hàm sigmoid, binary cross-entropy loss. Model tuyến tính có phù hợp với bài toán này không?
 
 #### 4.3 Decision Tree
 - `DecisionTreeClassifier` với vài giá trị `max_depth` (5, 10, 15, None)
 - 5-Fold CV cho mỗi config
 - In kết quả so sánh max_depth
-- **Markdown**: max_depth nào tốt nhất? Có dấu hiệu overfit không?
+
+**⚡ Bắt buộc thêm công thức bằng LaTeX**:
+$$\text{Gini}(t) = 1 - \sum_{k} p_k^2$$
+$$\text{Entropy}(t) = -\sum_{k} p_k \log_2(p_k)$$
+
+- **Markdown**: max_depth nào tốt nhất? Có dấu hiệu overfit không? Giải thích Gini vs Entropy.
 
 #### 4.4 Random Forest
-- `RandomForestClassifier` với vài giá trị `n_estimators` (100, 200, 500)
+- `RandomForestClassifier` với vài giá trị `n_estimators` (100, 200)
 - 5-Fold CV
 - In kết quả + feature importance plot
-- **Markdown**: So sánh với Decision Tree. Ensemble có cải thiện không?
+
+**⚡ Bắt buộc thêm công thức bằng LaTeX** (Bagging):
+$$\hat{y} = \text{majority\_vote}\left(h_1(\mathbf{x}), h_2(\mathbf{x}), \ldots, h_T(\mathbf{x})\right)$$
+
+- **Markdown**: So sánh với Decision Tree. Tại sao Bagging giảm variance? Ensemble có cải thiện không?
 
 #### 4.5 SVM
 - `StandardScaler` + `SVC(kernel='linear')` hoặc `SVC(kernel='rbf')`
 - 5-Fold CV (nếu data lớn quá, dùng subset ~20-30k rows)
-- **Markdown**: Performance so với tree-based models?
+
+**⚡ Bắt buộc thêm công thức bằng LaTeX**:
+$$\min_{\mathbf{w},b} \frac{1}{2}\|\mathbf{w}\|^2 \quad \text{s.t.} \quad y_i(\mathbf{w}^T\mathbf{x}_i + b) \geq 1$$
+
+- **Markdown**: Giải thích margin maximization. Performance so với tree-based models?
 
 #### 4.6 Bảng So Sánh Baseline
 - Bảng tổng hợp:
@@ -218,7 +252,7 @@ Train các model cơ bản làm baseline, thiết lập benchmark accuracy.
 ## 🔶 GĐ3b — `05_model_advanced.ipynb` (Đàm Đạt + Tâm + Thành)
 
 ### Mục tiêu
-Train GBDT models + ensemble để đạt accuracy cao nhất cho Kaggle submission.
+Train GBDT models + ensemble để đạt accuracy cao nhất.
 
 ### Cấu trúc notebook
 
@@ -230,53 +264,45 @@ Train GBDT models + ensemble để đạt accuracy cao nhất cho Kaggle submiss
 #### 5.2 XGBoost (Đàm Đạt)
 - `XGBClassifier` với initial params
 - 5-Fold CV → in accuracy mean ± std
-- Hyperparameter tuning (Optuna hoặc manual):
-  - `max_depth`, `learning_rate`, `n_estimators`, `subsample`, `colsample_bytree`
+- Tuning **cơ bản** (manual, không Optuna): thử 2-3 bộ params cho `max_depth`, `learning_rate`, `n_estimators`
 - In best params + best accuracy
-- **Markdown**: Params nào ảnh hưởng nhiều nhất? So sánh với baseline
+
+**⚡ Bắt buộc thêm công thức bằng LaTeX**:
+$$\mathcal{L}(\theta) = \sum_i l(y_i, \hat{y}_i) + \sum_k \Omega(f_k), \quad \Omega(f) = \gamma T + \frac{1}{2}\lambda\|\mathbf{w}\|^2$$
+
+- **Markdown**: Giải thích regularization term $\Omega$ trong XGBoost — tại sao nó giúp tránh overfitting? So sánh với baseline.
 
 #### 5.3 LightGBM (Tâm)
 - `LGBMClassifier` với initial params
 - 5-Fold CV → in accuracy mean ± std
-- Hyperparameter tuning:
-  - `num_leaves`, `learning_rate`, `n_estimators`, `min_child_samples`
+- Tuning **cơ bản** (manual): thử 2-3 bộ params cho `num_leaves`, `learning_rate`, `n_estimators`
 - In best params + best accuracy
-- **Markdown**: So sánh với XGBoost về accuracy và tốc độ train
 
-#### 5.4 CatBoost (Đàm Đạt)
-- `CatBoostClassifier` — truyền danh sách `cat_features` nếu còn
-- 5-Fold CV → in accuracy mean ± std
-- Hyperparameter tuning:
-  - `depth`, `learning_rate`, `iterations`
-- In best params + best accuracy
-- **Markdown**: CatBoost xử lý categorical tốt hơn không? So sánh 3 GBDT models
+**⚡ Bắt buộc thêm công thức bằng LaTeX** (Gradient Boosting update):
+$$F_m(\mathbf{x}) = F_{m-1}(\mathbf{x}) + \eta \cdot h_m(\mathbf{x})$$
 
-#### 5.5 Ensemble (Thành)
-- **Weighted Average**: blend predictions từ XGBoost + LightGBM + CatBoost
-  - Thử nhiều bộ weights → chọn tối ưu (dùng Optuna hoặc brute force trên CV)
-- **Stacking** (optional): dùng LogisticRegression làm meta-learner trên OOF predictions
-- 5-Fold CV cho ensemble → in accuracy
-- **Markdown**: Ensemble có cải thiện so với single model tốt nhất? Bao nhiêu %?
+- **Markdown**: Giải thích learning rate $\eta$, tại sao LightGBM nhanh hơn XGBoost (Leaf-wise growth vs Level-wise)?
 
-#### 5.6 Bảng So Sánh Advanced
+#### 5.4 Bảng So Sánh Advanced (Thành)
 - Bảng tổng hợp gồm cả baseline lẫn advanced:
 
-| Model | Accuracy | F1 | Ghi chú |
+| Model | Accuracy (CV) | F1 | Ghi chú |
 |---|---|---|---|
-| Best Baseline (RF) | ... | ... | từ NB04 |
-| XGBoost (tuned) | ... | ... | |
-| LightGBM (tuned) | ... | ... | |
-| CatBoost (tuned) | ... | ... | |
-| **Ensemble** | ... | ... | **Best** |
+| Logistic Regression | ... | ... | Baseline |
+| Decision Tree (best) | ... | ... | Baseline |
+| **Random Forest (best)** | ... | ... | Best Baseline |
+| SVM | ... | ... | Baseline |
+| XGBoost (tuned) | ... | ... | Advanced |
+| **LightGBM (tuned)** | ... | ... | **Best Overall** |
 
-- **Markdown**: Kết luận: model/ensemble nào sẽ dùng cho final submission? Tại sao?
+- **Markdown**: Kết luận: model nào cho kết quả tốt nhất? Advanced models có cải thiện đáng kể so với baseline không?
 
 ---
 
 ## 🔶 GĐ4 — `06_evaluation.ipynb` (Đàm Đạt + Tuấn)
 
 ### Mục tiêu
-Đánh giá final model + generate submission file + phân tích interpretability.
+Đánh giá final model + phân tích interpretability.
 
 ### Cấu trúc notebook
 
@@ -289,40 +315,49 @@ Train GBDT models + ensemble để đạt accuracy cao nhất cho Kaggle submiss
 - **Confusion Matrix**: heatmap với annotated counts
 - **Classification Report**: precision, recall, f1 cho mỗi class
 - **ROC-AUC Curve**: vẽ ROC curve + tính AUC score
-- **Markdown cho mỗi phần**: phân tích chi tiết — model sai ở đâu nhiều nhất? FP hay FN cao hơn? AUC có tốt không?
+- **Markdown cho mỗi phần**: phân tích chi tiết — model sai ở đâu nhiều nhất? FP hay FN cao hơn? Trong bài toán phát hiện trầm cảm, FN nguy hiểm hơn FP như thế nào?
 
-#### 6.3 Feature Importance / Interpretability
-- **Feature Importance**: bar chart top 15 features (từ best model)
-- **SHAP Analysis** (nếu có thời gian): SHAP summary plot, hoặc ít nhất waterfall plot cho vài samples
-- **Markdown**: Top features nào quan trọng nhất? Có khớp với intuition từ EDA không? Giải thích ý nghĩa.
+#### 6.3 ⭐ Feature Importance & SHAP Analysis (TRỌNG TÂM ĐIỂM SỐ)
+**Đây là phần quan trọng nhất của GĐ4, đầu tư thời gian nhiều nhất vào đây.**
+
+**Feature Importance (Tuấn)**:
+- Bar chart top 15 features từ best model
+- So sánh feature importance giữa XGBoost, LightGBM, CatBoost — 3 models có đồng ý với nhau không?
+- **Markdown**: Top features nào quan trọng nhất? Có khớp với EDA không? Giải thích ý nghĩa trực quan (ví dụ: tại sao `Suicidal_Thoughts` hay `Financial_Stress` lại ảnh hưởng mạnh?).
+
+**SHAP Analysis (Đàm Đạt — BẮT BUỘC, không optional)**:
+- `shap.summary_plot()`: tổng quan tất cả features — chiều tác động và độ lớn
+- `shap.bar_plot()`: mean absolute SHAP value ranking
+- Ít nhất 1 `shap.waterfall_plot()` hoặc `shap.force_plot()` cho 1-2 mẫu cụ thể (1 người có trầm cảm, 1 người không)
+- **Markdown chi tiết**: 
+  - Feature X tăng làm tăng/giảm xác suất Depression như thế nào?
+  - Phát hiện bất ngờ nào so với EDA không?
+  - Kết nối với kiến thức thực tế về sức khỏe tâm thần
 
 #### 6.4 So Sánh Tổng Hợp Tất Cả Models
 - Bảng final gồm tất cả models từ NB04 + NB05
 - Bar chart so sánh accuracy
 - **Markdown**: Kết luận tổng thể về performance
 
-#### 6.5 Generate Submission
+#### 6.5 Prediction trên Test Set
 - Load `test_final.csv`
 - Predict bằng best model/ensemble
-- Tạo DataFrame: `id`, `Depression`
-- Lưu `outputs/submissions/submission.csv`
 - In `.head()`, `.shape`, `value_counts()` của predictions
-- **Markdown**: Kiểm tra: đúng 93,800 rows? Tỷ lệ Depression predicted có hợp lý so với train?
+- **Markdown**: Tỷ lệ Depression predicted có hợp lý so với train? Phân tích phân phối predictions.
 
 ---
 
 ## 🔶 GĐ5 — Report & Video
 
 ### Report (LaTeX)
-Cấu trúc bắt buộc 10 sections:
+Cấu trúc bắt buộc 9 sections:
 
 1. **Project Planning & Task Distribution** (Kiệt)
    - Bảng phân công rõ ràng: ai làm gì, deadline, trạng thái
    - Tỷ lệ % đóng góp mỗi thành viên
 
 2. **Project Overview** (Tâm)
-   - Giới thiệu cuộc thi, bài toán, dataset
-   - Pipeline tổng thể (có thể vẽ diagram)
+   - Giới thiệu bài toán, dataset, pipeline tổng thể
 
 3. **Data Exploration** (Thành + Tuấn)
    - Tóm tắt key findings từ EDA
@@ -340,7 +375,7 @@ Cấu trúc bắt buộc 10 sections:
    - Mô tả từng model: params chính, cách train
    - Bảng tóm tắt models
 
-7. **Experiments & Results** (Kiệt)
+7. **Experiments & Results** (Kiệt + Thành)
    - Bảng so sánh tất cả models (accuracy, F1, ...)
    - Confusion matrix, ROC curve
    - Phân tích: model nào tốt nhất và tại sao
@@ -349,15 +384,17 @@ Cấu trúc bắt buộc 10 sections:
    - Tóm tắt những gì đã làm
    - Đề xuất cải thiện: more FE, neural networks, more data, ...
 
-9. **Kaggle Screenshot** (Thành)
-   - Screenshot kết quả submission
-
-10. **References** (Kiệt)
-    - Kaggle competition link
-    - Thư viện sử dụng
-    - Papers / blog posts tham khảo (nếu có)
+9. **References** (Kiệt)
+   - Kaggle competition link, thư viện sử dụng
+   - Papers / blog posts tham khảo (nếu có)
 
 ### Video (ALL)
-- 12-15 phút, 5 phần, mỗi người 1 phần
+- 13-16 phút, 5 phần báo cáo + 1 phần **Demo trực tiếp (bắt buộc)**
 - Có thể dùng Google Meet recording
 - Tải lên YouTube (public/unlisted)
+
+**Phần Demo (Tâm thực hiện, 1-2 phút cuối video)**:
+- Mở Jupyter Notebook trực tiếp trên màn hình
+- Chạy hàm `predict()` với mock data cụ thể (1-2 bộ thông tin giả định)
+- In ra kết quả: người này có khả năng bị trầm cảm không + xác suất
+- Không cần giao diện fancy, chỉ cần rõ ràng và chạy được
