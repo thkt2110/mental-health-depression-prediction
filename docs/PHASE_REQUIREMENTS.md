@@ -49,12 +49,20 @@ Với mỗi feature, phân tích mối quan hệ với target:
 - **Categorical**: stacked bar chart hoặc grouped countplot theo Depression
 - **Markdown cho mỗi feature**: Feature này có khả năng phân biệt Depression cao hay thấp? Giải thích pattern nhìn thấy.
 
-#### 1.7 Correlation Analysis
+#### 1.7 Multivariate Analysis — Tương tác đa biến
+- Khảo sát sự kết hợp của 2 hoặc 3 tính năng với nhau để xem xét tác động lên target (`Depression`).
+- Gợi ý biểu đồ:
+  - `Sleep Duration` kết hợp với `Financial Stress` ảnh hưởng đến `Depression` ra sao? (VD: Dùng grouped bar chart hoặc `sns.catplot`).
+  - Phân tích tương tác giữa nhóm biến rủi ro: `Suicidal_Thoughts` vs `Family_History` vs `Depression`.
+  - Tác động của `Work/Study Hours` phân rã theo `Age Group`.
+- **Markdown**: Bạn có phát hiện ra tương tác (interaction) nào thú vị để tiền đề cho GĐ2 tạo thêm tính năng (Feature Engineering) không? Yếu tố nào khi kết hợp lại làm tăng nguy cơ trầm cảm đột biến thay vì đứng đơn lẻ?
+
+#### 1.8 Correlation Analysis
 - Correlation heatmap cho numerical features (include Depression)
 - Top features tương quan mạnh nhất với Depression
 - **Markdown**: Nhận xét cặp features nào tương quan cao (multicollinearity?), features nào tương quan mạnh với target
 
-#### 1.8 Key Findings & Đề xuất
+#### 1.9 Key Findings & Đề xuất
 - **Markdown tổng kết**:
   - Liệt kê 5-7 key findings quan trọng nhất
   - Đề xuất cụ thể cho GĐ2: cần xử lý gì ở preprocessing, features nào nên tạo/loại bỏ
