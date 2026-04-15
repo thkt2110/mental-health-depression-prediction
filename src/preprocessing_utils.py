@@ -489,12 +489,14 @@ def validate_preprocessed_data(
         f"Unexpected NaN found in: {unexpected_nan}",
     )
 
-    # 3. High-cardinality columns are object dtype
+    # 3. High-cardinality columns are object/string dtype
     for col in high_cardinality_cols:
         if col in df.columns:
+            # Pandas 3.0+ uses 'str' or 'string' for string columns, while older pandas uses object
+            is_valid_type = df[col].dtype in (object, 'O', 'object', 'str', 'string')
             _check(
-                df[col].dtype == object,
-                f"'{col}' is object dtype (kept for Target Encoding).",
+                is_valid_type,
+                f"'{col}' is string dtype (kept for Target Encoding).",
                 f"'{col}' has unexpected dtype: {df[col].dtype}",
             )
 
