@@ -12,3 +12,4 @@ jupyter
 ipykernel
 python-dotenv
 category_encoders
+pyarrow
