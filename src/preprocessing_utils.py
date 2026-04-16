@@ -794,9 +794,9 @@ def add_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create interaction features motivated by domain knowledge and EDA.
 
-    Returns a copied DataFrame with six additional numeric features:
+    Returns a copied DataFrame with seven additional numeric features:
     stress_load, wellbeing_index, stress_satisfaction_ratio,
-    hours_pressure_ratio, poor_sleep, and cgpa_pressure.
+    hours_pressure_ratio, poor_sleep, cgpa_pressure, and risk_score.
     """
     df = df.copy()
 
@@ -808,6 +808,8 @@ def add_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
         "Work/Study Hours",
         "CGPA",
         "has_cgpa",
+        "Have you ever had suicidal thoughts ?",
+        "Family History of Mental Illness",
     ]
     missing = [col for col in required_cols if col not in df.columns]
     if missing:
@@ -819,6 +821,13 @@ def add_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
     df["hours_pressure_ratio"] = df["Work/Study Hours"] * df["Pressure"]
     df["poor_sleep"] = (df["Sleep Duration"] == 0).astype(int)
     df["cgpa_pressure"] = df["CGPA"] * df["Pressure"] * df["has_cgpa"]
+
+    # Risk score: yeu to rui ro kep — ket hop suy nghi tu sat + tien su gia dinh
+    # Gia tri: 0 = khong co yeu to rui ro, 1 = co 1 yeu to, 2 = ca hai yeu to
+    df["risk_score"] = (
+        df["Have you ever had suicidal thoughts ?"].astype(int)
+        + df["Family History of Mental Illness"].astype(int)
+    )
 
     return df
 
