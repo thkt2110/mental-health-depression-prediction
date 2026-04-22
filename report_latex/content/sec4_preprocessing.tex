@@ -4,7 +4,7 @@
 \subsection{Làm sạch dữ liệu bẩn (Noisy Data)}
 \label{subsec:noisy_data}
 
-Trong quá trình khám phá dữ liệu, nhóm tác giả phát hiện hai cột chứa dữ liệu bẩn nghiêm trọng do lỗi nhập liệu (\textit{data entry error}) hoặc hoán đổi cột (\textit{column swap}):
+Trong quá trình khám phá dữ liệu, nhóm phát hiện hai cột chứa dữ liệu bẩn nghiêm trọng do lỗi nhập liệu (\textit{data entry error}) hoặc hoán đổi cột (\textit{column swap}):
 
 \begin{itemize}[noitemsep]
     \item \textbf{Sleep Duration}: Có 36 giá trị unique thay vì 4 giá trị hợp lệ. Khoảng 79 mẫu chứa các giá trị bất thường như tên thành phố (\texttt{Pune}), tên cột (\texttt{Work\_Study\_Hours}), hoặc số giờ vô nghĩa (\texttt{45-48 hours}).
@@ -101,7 +101,7 @@ x' = \frac{x - x_{\min}}{x_{\max} - x_{\min}}
 
 trong đó $x_{\min}$ và $x_{\max}$ lần lượt là giá trị nhỏ nhất và lớn nhất của đặc trưng trong tập huấn luyện.
 
-Trong dự án này, nhóm tác giả sử dụng \textbf{Standardization} (Phương trình~\ref{eq:standardization}) cho Logistic Regression và SVM vì phương pháp này ít bị ảnh hưởng bởi outliers hơn Min-Max.
+Trong dự án này, nhóm sử dụng \textbf{Standardization} (Phương trình~\ref{eq:standardization}) cho Logistic Regression và SVM vì phương pháp này ít bị ảnh hưởng bởi outliers hơn Min-Max.
 
 \subsection{Kết quả tiền xử lý}
 \label{subsec:preprocessing_result}

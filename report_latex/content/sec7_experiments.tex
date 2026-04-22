@@ -10,22 +10,20 @@ Bảng~\ref{tab:model_comparison} trình bày kết quả đánh giá toàn bộ
 \centering
 \caption{So sánh hiệu suất các mô hình (5-Fold Stratified CV)}
 \label{tab:model_comparison}
-\begin{tabular}{lcccc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Mô hình} & \textbf{Accuracy} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
+\textbf{Mô hình} & \textbf{Accuracy} & \textbf{F1-score} \\
 \midrule
-Logistic Regression & 0,9376 & 0,8243 & --- & --- \\
-Decision Tree (depth=10) & 0,9292 & 0,8011 & --- & --- \\
-Random Forest (200 trees) & 0,9364 & 0,8208 & --- & --- \\
-SVM (linear) & 0,9367 & 0,8230 & --- & --- \\
+Logistic Regression & 0,9376 & 0,8243 \\
+Decision Tree (depth=10) & 0,9292 & 0,8011 \\
+Random Forest (200 trees) & 0,9364 & 0,8208 \\
+SVM (linear) & 0,9367 & 0,8230 \\
 \midrule
-\textbf{XGBoost (tuned)} & \textbf{0,9396} & \textbf{0,8312} & --- & --- \\
-LightGBM (tuned) & 0,9392 & 0,8306 & --- & --- \\
+\textbf{XGBoost (tuned)} & \textbf{0,9396} & \textbf{0,8312} \\
+LightGBM (tuned) & 0,9392 & 0,8306 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\textit{Ghi chú: Các giá trị Precision và Recall cần được bổ sung từ kết quả notebook thực nghiệm.}
 
 \begin{figure}[H]
 \centering
@@ -76,12 +74,12 @@ Bảng~\ref{tab:classification_report} trình bày báo cáo phân loại chi ti
 \toprule
 \textbf{Lớp} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} & \textbf{Support} \\
 \midrule
-0 (Không trầm cảm) & 0,960 & 0,966 & 0,963 & 115.133 \\
-1 (Trầm cảm) & 0,844 & 0,819 & 0,831 & 25.567 \\
+0 (Không trầm cảm) & 0,9600 & 0,9663 & 0,9632 & 115.133 \\
+1 (Trầm cảm) & 0,8437 & 0,8187 & 0,8310 & 25.567 \\
 \midrule
-\textbf{Accuracy} & \multicolumn{4}{c}{\textbf{0,9396}} \\
-Macro avg & 0,902 & 0,892 & 0,897 & 140.700 \\
-Weighted avg & 0,939 & 0,940 & 0,939 & 140.700 \\
+\textbf{Accuracy} & \multicolumn{4}{c}{\textbf{0,9395}} \\
+Macro avg & 0,9019 & 0,8925 & 0,8971 & 140.700 \\
+Weighted avg & 0,9389 & 0,9395 & 0,9391 & 140.700 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -163,7 +161,7 @@ Top 5 đặc trưng theo SHAP: \texttt{Age} (+1,96), \texttt{Suicidal Thoughts} 
 
 \subsubsection{SHAP Waterfall --- Phân tích ca cụ thể}
 
-Để minh họa khả năng giải thích ở mức \textit{individual prediction}, nhóm tác giả chọn hai ca cụ thể:
+Để minh họa khả năng giải thích ở mức \textit{individual prediction}, nhóm chọn hai ca cụ thể:
 
 \textbf{Ca A --- Người bị trầm cảm} (Hình~\ref{fig:waterfall_a}): Đối tượng 26 tuổi, có suy nghĩ tự tử, stress\_load = 20, CGPA = 5,24. Mô hình dự đoán xác suất trầm cảm $P = 0,975$ (rất cao). Các yếu tố đóng góp lớn nhất: Age = 26 (+1,16), Suicidal Thoughts = 1 (+0,63), stress\_load = 20 (+0,59). Tất cả các đặc trưng đều đẩy dự đoán theo hướng ``trầm cảm'', phù hợp với profile lâm sàng của một thanh niên có nhiều yếu tố rủi ro.
 
