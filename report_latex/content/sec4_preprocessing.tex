@@ -51,7 +51,7 @@ Hình~\ref{fig:missing_values} trình bày tỷ lệ missing values theo từng 
 \subsection{Gộp các cột điều kiện (Merge Conditional Columns)}
 \label{subsec:merge_columns}
 
-Do cơ chế MNAR được phát hiện ở Mục~\ref{subsec:missing_values}, việc điền missing bằng mean/median là \textbf{không phù hợp} --- vì giá trị missing mang ý nghĩa thực sự (sinh viên không có Work Pressure, người đi làm không có Academic Pressure). Nhóm tác giả áp dụng chiến lược gộp cột (\textit{merge}) như sau:
+Do cơ chế MNAR được phát hiện ở Mục~\ref{subsec:missing_values}, việc điền missing bằng mean/median là \textbf{không phù hợp} --- vì giá trị missing mang ý nghĩa thực sự (sinh viên không có Work Pressure, người đi làm không có Academic Pressure). Nhóm áp dụng chiến lược gộp cột (\textit{merge}) như sau:
 
 \begin{itemize}[noitemsep]
     \item \texttt{Academic Pressure} + \texttt{Work Pressure} $\rightarrow$ \texttt{Pressure}: gộp thành một biến thống nhất đo mức áp lực chung.
@@ -83,7 +83,7 @@ Lý do không sử dụng One-Hot Encoding: các biến này có thứ tự rõ 
 
 Chuẩn hóa đặc trưng chỉ cần thiết cho các mô hình nhạy cảm với thang đo như Logistic Regression và SVM. Các mô hình tree-based (Decision Tree, Random Forest, XGBoost, LightGBM) không yêu cầu chuẩn hóa.
 
-\textbf{Standardization} (Z-score normalization) --- biến đổi dữ liệu về phân phối chuẩn với trung bình $\mu = 0$ và độ lệch chuẩn $\sigma = 1$:
+\textbf{Standardization} (Z-score normalization) --- dịch chuyển và co giãn dữ liệu sao cho trung bình bằng 0 và độ lệch chuẩn bằng 1. Lưu ý rằng phương pháp này \textbf{không} biến đổi hình dạng phân phối gốc về phân phối chuẩn (Gaussian), mà chỉ chuẩn hóa thang đo:
 
 \begin{equation}
 z = \frac{x - \mu}{\sigma}

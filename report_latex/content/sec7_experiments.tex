@@ -32,7 +32,16 @@ LightGBM (tuned) & 0,9392 & 0,8306 \\
 \label{fig:model_comparison}
 \end{figure}
 
-\textbf{Nhận xét}: XGBoost (tuned) đạt Accuracy cao nhất (93,96\%) và F1-score cao nhất (0,8312). Sự chênh lệch giữa các mô hình tương đối nhỏ ($< 1\%$ Accuracy), cho thấy bước Feature Engineering đã tạo ra tập đặc trưng có chất lượng cao, giúp ngay cả các mô hình đơn giản cũng đạt kết quả tốt.
+\textbf{Nhận xét}: XGBoost (tuned) đạt Accuracy cao nhất (93,96\%) và F1-score cao nhất (0,8312). Tuy nhiên, sự chênh lệch giữa các mô hình tương đối nhỏ ($< 1\%$ Accuracy giữa Baseline và Advanced). Có ba nguyên nhân chính giải thích điều này:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Feature Engineering chất lượng cao}: Bước tạo đặc trưng tương tác (Mục~\ref{subsec:interaction_features}) và Age Binning đã ``giúp sẵn'' các mô hình đơn giản nắm bắt được các pattern phi tuyến --- giảm lợi thế vốn có của mô hình phức tạp.
+    \item \textbf{Đặc tính dữ liệu}: Bộ dữ liệu synthetic có cấu trúc tương đối sạch và pattern rõ ràng (Age là đặc trưng chi phối, $r = -0{,}565$), khiến ngay cả mô hình tuyến tính cũng phân tách tốt.
+    \item \textbf{Manual Tuning bảo thủ}: Phương pháp tuning thủ công không khai thác triệt để không gian siêu tham số như Grid Search hay Bayesian Optimization, dẫn đến mô hình nâng cao chưa đạt tiềm năng tối đa. Tuy nhiên, điều này cũng giúp tránh overfitting.
+\end{itemize}
+
+Dù chênh lệch Accuracy nhỏ, XGBoost vẫn cải thiện đáng kể ở F1-score (+1,0\% so với Logistic Regression), cho thấy khả năng phân loại lớp thiểu số (Depression = 1) tốt hơn.
+
 
 \subsection{Confusion Matrix}
 \label{subsec:confusion_matrix}
@@ -48,7 +57,8 @@ Hình~\ref{fig:confusion_matrix} trình bày Confusion Matrix của mô hình XG
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{evaluation/confusion_matrix.png}
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/confusion_matrix.png}}}
 \caption{Confusion Matrix --- XGBoost (OOF Predictions)}
 \label{fig:confusion_matrix}
 \end{figure}
@@ -100,7 +110,8 @@ trong đó $\text{TPR}(t) = \frac{TP}{TP + FN}$ và $\text{FPR}(t) = \frac{FP}{F
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{evaluation/roc_curve.png}
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/roc_curve.png}}}
 \caption{Đường cong ROC --- XGBoost (OOF), AUC = 0,9751}
 \label{fig:roc_curve}
 \end{figure}
@@ -133,7 +144,8 @@ SHAP (SHapley Additive exPlanations)~\cite{lundberg2017shap} cung cấp giải t
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.65\textwidth]{evaluation/shap_summary.png}
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.63\textwidth]{evaluation/shap_summary.png}}}
 \caption{SHAP Summary Plot --- XGBoost: mỗi điểm là một mẫu, màu đỏ = giá trị cao, xanh = giá trị thấp}
 \label{fig:shap_summary}
 \end{figure}
@@ -152,7 +164,8 @@ Hình~\ref{fig:shap_bar} xếp hạng các đặc trưng theo giá trị $\text{
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.65\textwidth]{evaluation/shap_bar.png}
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.63\textwidth]{evaluation/shap_bar.png}}}
 \caption{Mean $|\text{SHAP}|$ --- Xếp hạng tầm quan trọng đặc trưng theo SHAP}
 \label{fig:shap_bar}
 \end{figure}
@@ -167,7 +180,8 @@ Top 5 đặc trưng theo SHAP: \texttt{Age} (+1,96), \texttt{Suicidal Thoughts} 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{evaluation/waterfall_a.png}
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/waterfall_a.png}}}
 \caption{SHAP Waterfall --- Ca A: Đối tượng trầm cảm (26 tuổi, $P = 0,975$)}
 \label{fig:waterfall_a}
 \end{figure}
@@ -176,7 +190,8 @@ Top 5 đặc trưng theo SHAP: \texttt{Age} (+1,96), \texttt{Suicidal Thoughts} 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{evaluation/waterfall_b.png}
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/waterfall_b.png}}}
 \caption{SHAP Waterfall --- Ca B: Đối tượng không trầm cảm (59 tuổi, $P = 0,000$)}
 \label{fig:waterfall_b}
 \end{figure}

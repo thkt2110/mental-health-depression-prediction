@@ -45,33 +45,85 @@ Hình~\ref{fig:age_group} minh họa sự khác biệt rất lớn về tỷ l�
 \subsection{Tạo đặc trưng tương tác (Interaction Features)}
 \label{subsec:interaction_features}
 
-Dựa trên kết quả phân tích đa biến ở Mục~\ref{subsec:multivariate}, nhóm tạo thêm các đặc trưng kết hợp nhằm nắm bắt hiệu ứng tương tác giữa nhiều yếu tố:
+Dựa trên kết quả phân tích đa biến ở Mục~\ref{subsec:multivariate}, nhóm tạo thêm \textbf{7 đặc trưng tương tác} nhằm nắm bắt hiệu ứng kết hợp giữa nhiều yếu tố mà các đặc trưng gốc riêng lẻ không thể hiện được.
 
-\textbf{Stress Load} --- đo mức tải stress tổng hợp từ áp lực và căng thẳng tài chính:
+\subsubsection{Các đặc trưng đo mức căng thẳng}
+
+\textbf{(1) Stress Load} --- đo mức tải stress tổng hợp từ áp lực và căng thẳng tài chính:
 \begin{equation}
 \text{stress\_load} = \text{Pressure} \times \text{Financial\_Stress}
 \label{eq:stress_load}
 \end{equation}
 
-\textbf{Wellbeing Index} --- chỉ số sức khỏe tổng thể dựa trên mức hài lòng và giấc ngủ:
-\begin{equation}
-\text{wellbeing\_index} = \frac{\text{Satisfaction} + \text{Sleep\_Duration}}{2}
-\label{eq:wellbeing}
-\end{equation}
-
-\textbf{Stress-Satisfaction Ratio} --- tỷ lệ giữa áp lực và mức hài lòng:
+\textbf{(2) Stress-Satisfaction Ratio} --- tỷ lệ giữa áp lực và mức hài lòng, phản ánh sự mất cân bằng tâm lý:
 \begin{equation}
 \text{stress\_satisfaction\_ratio} = \frac{\text{Pressure}}{\text{Satisfaction} + 1}
 \label{eq:stress_ratio}
 \end{equation}
 
-\textbf{Risk Score} --- chỉ số rủi ro cộng gộp từ hai yếu tố cảnh báo mạnh nhất:
+\textbf{(3) Hours-Pressure Ratio} --- đo tác động kết hợp giữa số giờ làm việc/học và áp lực:
+\begin{equation}
+\text{hours\_pressure\_ratio} = \text{Work/Study\_Hours} \times \text{Pressure}
+\label{eq:hours_pressure}
+\end{equation}
+
+\subsubsection{Các đặc trưng đo sức khỏe tổng thể}
+
+\textbf{(4) Wellbeing Index} --- chỉ số sức khỏe tổng thể dựa trên mức hài lòng và chất lượng giấc ngủ:
+\begin{equation}
+\text{wellbeing\_index} = \frac{\text{Satisfaction} + \text{Sleep\_Duration}}{2}
+\label{eq:wellbeing}
+\end{equation}
+
+\textbf{(5) Poor Sleep} --- biến nhị phân đánh dấu người có thời lượng ngủ kém nhất (dưới 5 giờ):
+\begin{equation}
+\text{poor\_sleep} = \begin{cases} 1 & \text{nếu Sleep\_Duration} = 0 \text{ (Less than 5 hours)} \\ 0 & \text{ngược lại} \end{cases}
+\label{eq:poor_sleep}
+\end{equation}
+
+\subsubsection{Các đặc trưng đo yếu tố rủi ro}
+
+\textbf{(6) CGPA-Pressure} --- đo tác động kết hợp giữa điểm trung bình tích lũy và áp lực, chỉ áp dụng cho sinh viên:
+\begin{equation}
+\text{cgpa\_pressure} = \text{CGPA} \times \text{Pressure} \times \text{has\_cgpa}
+\label{eq:cgpa_pressure}
+\end{equation}
+
+trong đó $\text{has\_cgpa} = 1$ nếu đối tượng là sinh viên, $\text{has\_cgpa} = 0$ nếu là người đi làm (khi đó $\text{cgpa\_pressure} = 0$, loại bỏ tín hiệu CGPA không có ý nghĩa).
+
+\textbf{(7) Risk Score} --- chỉ số rủi ro cộng gộp từ hai yếu tố cảnh báo mạnh nhất được phát hiện trong EDA:
 \begin{equation}
 \text{risk\_score} = \text{Suicidal\_Thoughts} + \text{Family\_History}
 \label{eq:risk_score}
 \end{equation}
 
-Hình~\ref{fig:interaction_cont} minh họa phân phối các đặc trưng tương tác liên tục và mối quan hệ với Depression. Nhóm trầm cảm có giá trị \texttt{stress\_load} và \texttt{stress\_satisfaction\_ratio} cao hơn rõ rệt, trong khi \texttt{wellbeing\_index} thấp hơn --- phù hợp với kỳ vọng.
+Giá trị 0 = không có yếu tố rủi ro nào; 1 = có một yếu tố; 2 = có cả hai yếu tố.
+
+\subsubsection{Tổng hợp và đánh giá}
+
+Bảng~\ref{tab:interaction_features} tóm tắt toàn bộ 7 đặc trưng tương tác cùng ý nghĩa miền (\textit{domain meaning}).
+
+\begin{table}[H]
+\centering
+\caption{Tổng hợp 7 đặc trưng tương tác được tạo}
+\label{tab:interaction_features}
+\small
+\begin{tabular}{clp{7cm}}
+\toprule
+\textbf{\#} & \textbf{Tên đặc trưng} & \textbf{Ý nghĩa miền (Domain Meaning)} \\
+\midrule
+1 & stress\_load & Tải stress tổng hợp (áp lực $\times$ tài chính) \\
+2 & stress\_satisfaction\_ratio & Mất cân bằng giữa áp lực và hài lòng \\
+3 & hours\_pressure\_ratio & Quá tải công việc/học tập \\
+4 & wellbeing\_index & Chỉ số sức khỏe tổng thể \\
+5 & poor\_sleep & Cờ ngủ kém (nhị phân) \\
+6 & cgpa\_pressure & Áp lực học thuật của sinh viên \\
+7 & risk\_score & Mức rủi ro kép (tự tử + tiền sử) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hình~\ref{fig:interaction_cont} minh họa phân phối các đặc trưng tương tác liên tục và mối quan hệ với Depression. Nhóm trầm cảm có giá trị \texttt{stress\_load}, \texttt{stress\_satisfaction\_ratio} và \texttt{hours\_pressure\_ratio} cao hơn rõ rệt, trong khi \texttt{wellbeing\_index} thấp hơn --- phù hợp với kỳ vọng từ kiến thức y học.
 
 \begin{figure}[H]
 \centering
@@ -82,7 +134,7 @@ Hình~\ref{fig:interaction_cont} minh họa phân phối các đặc trưng tư�
 
 \clearpage
 
-Hình~\ref{fig:interaction_disc} cho thấy đặc trưng \texttt{risk\_score} có khả năng phân biệt tốt: khi score = 0, tỷ lệ trầm cảm chỉ 4,7\%; khi score = 1 là 17,9\%; và khi score = 2 (cả hai yếu tố rủi ro đều có) là 32,6\%.
+Hình~\ref{fig:interaction_disc} cho thấy hai đặc trưng rời rạc cũng có khả năng phân biệt tốt. Đặc biệt, \texttt{risk\_score} cho thấy hiệu ứng ``dose-response'' rõ ràng: khi score = 0, tỷ lệ trầm cảm chỉ 4,7\%; khi score = 1 là 17,9\%; và khi score = 2 (cả hai yếu tố rủi ro đều có) lên tới 32,6\%. Tương tự, \texttt{poor\_sleep} = 1 cũng liên quan đến tỷ lệ trầm cảm cao hơn.
 
 \begin{figure}[H]
 \centering
@@ -90,6 +142,7 @@ Hình~\ref{fig:interaction_disc} cho thấy đặc trưng \texttt{risk\_score} c
 \caption{Tỷ lệ Depression theo poor\_sleep và risk\_score}
 \label{fig:interaction_disc}
 \end{figure}
+
 
 \subsection{Lựa chọn đặc trưng (Feature Selection)}
 \label{subsec:feature_selection}
