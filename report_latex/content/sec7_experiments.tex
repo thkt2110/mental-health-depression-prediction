@@ -59,6 +59,7 @@ Hình~\ref{fig:confusion_matrix} trình bày Confusion Matrix của mô hình XG
 \centering
 {\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
 \fbox{\includegraphics[width=0.58\textwidth]{evaluation/confusion_matrix.png}}}
+\vspace{5pt}
 \caption{Confusion Matrix --- XGBoost (OOF Predictions)}
 \label{fig:confusion_matrix}
 \end{figure}
@@ -112,6 +113,7 @@ trong đó $\text{TPR}(t) = \frac{TP}{TP + FN}$ và $\text{FPR}(t) = \frac{FP}{F
 \centering
 {\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
 \fbox{\includegraphics[width=0.58\textwidth]{evaluation/roc_curve.png}}}
+\vspace{5pt}
 \caption{Đường cong ROC --- XGBoost (OOF), AUC = 0,9751}
 \label{fig:roc_curve}
 \end{figure}
@@ -146,6 +148,7 @@ SHAP (SHapley Additive exPlanations)~\cite{lundberg2017shap} cung cấp giải t
 \centering
 {\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
 \fbox{\includegraphics[width=0.63\textwidth]{evaluation/shap_summary.png}}}
+\vspace{5pt}
 \caption{SHAP Summary Plot --- XGBoost: mỗi điểm là một mẫu, màu đỏ = giá trị cao, xanh = giá trị thấp}
 \label{fig:shap_summary}
 \end{figure}
@@ -166,6 +169,7 @@ Hình~\ref{fig:shap_bar} xếp hạng các đặc trưng theo giá trị $\text{
 \centering
 {\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
 \fbox{\includegraphics[width=0.63\textwidth]{evaluation/shap_bar.png}}}
+\vspace{5pt}
 \caption{Mean $|\text{SHAP}|$ --- Xếp hạng tầm quan trọng đặc trưng theo SHAP}
 \label{fig:shap_bar}
 \end{figure}
@@ -182,6 +186,7 @@ Top 5 đặc trưng theo SHAP: \texttt{Age} (+1,96), \texttt{Suicidal Thoughts} 
 \centering
 {\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
 \fbox{\includegraphics[width=0.58\textwidth]{evaluation/waterfall_a.png}}}
+\vspace{5pt}
 \caption{SHAP Waterfall --- Ca A: Đối tượng trầm cảm (26 tuổi, $P = 0,975$)}
 \label{fig:waterfall_a}
 \end{figure}
@@ -192,6 +197,7 @@ Top 5 đặc trưng theo SHAP: \texttt{Age} (+1,96), \texttt{Suicidal Thoughts} 
 \centering
 {\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
 \fbox{\includegraphics[width=0.58\textwidth]{evaluation/waterfall_b.png}}}
+\vspace{5pt}
 \caption{SHAP Waterfall --- Ca B: Đối tượng không trầm cảm (59 tuổi, $P = 0,000$)}
 \label{fig:waterfall_b}
 \end{figure}
