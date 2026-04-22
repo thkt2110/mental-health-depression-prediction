@@ -3,10 +3,32 @@ Utility functions for Exploratory Data Analysis (EDA).
 Used in Phase 1: 01_eda.ipynb
 """
 
+import os
+import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+
+def _sanitize_filename(path):
+    """Sanitize the filename part of a path to remove invalid characters."""
+    dirpart = os.path.dirname(path)
+    filepart = os.path.basename(path)
+    # Replace characters invalid in Windows filenames with underscores
+    filepart = re.sub(r'[\\/:*?"<>|]', '_', filepart)
+    # Replace multiple spaces or underscores with single underscore
+    filepart = re.sub(r'[\s_]+', '_', filepart).strip('_')
+    return os.path.join(dirpart, filepart)
+
+
+def _maybe_save(save_path):
+    """Save current figure to save_path if provided."""
+    if save_path is not None:
+        save_path = _sanitize_filename(save_path)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+
 
 # ==========================================
 # ZONE: THÀNH
@@ -31,13 +53,14 @@ def create_overview_table(df):
     return overview
 
 
-def plot_target_distribution(df, target='Depression'):
+def plot_target_distribution(df, target='Depression', save_path=None):
     """
     Vẽ countplot + pie chart cho biến mục tiêu.
 
     Args:
         df: DataFrame chứa dữ liệu.
         target: Tên cột target (mặc định 'Depression').
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -65,6 +88,7 @@ def plot_target_distribution(df, target='Depression'):
     axes[1].set_title('Tỷ lệ Depression', fontsize=14, fontweight='bold')
 
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # In tỷ lệ
@@ -75,13 +99,14 @@ def plot_target_distribution(df, target='Depression'):
     print(f"  Tỷ số (class 1 / class 0): {ratio[1]/ratio[0]:.3f}")
 
 
-def plot_missing_values(df):
+def plot_missing_values(df, save_path=None):
     """
     Vẽ bar chart % missing values cho các cột có missing.
     Kèm bảng thống kê.
 
     Args:
         df: DataFrame chứa dữ liệu.
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     missing = df.isnull().sum()
     missing_pct = (missing / len(df) * 100).round(2)
@@ -107,6 +132,7 @@ def plot_missing_values(df):
 
     ax.set_xlim(0, missing_df['% missing'].max() * 1.15)
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # Bảng thống kê
@@ -115,7 +141,7 @@ def plot_missing_values(df):
 
 
 def plot_missing_pattern_by_group(df, group_col='Working Professional or Student',
-                                  cols=None):
+                                  cols=None, save_path=None):
     """
     So sánh missing values giữa các nhóm (Student vs Working Professional).
 
@@ -123,6 +149,7 @@ def plot_missing_pattern_by_group(df, group_col='Working Professional or Student
         df: DataFrame chứa dữ liệu.
         group_col: Cột phân nhóm.
         cols: Danh sách cột cần kiểm tra. Mặc định là các cột conditional.
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     if cols is None:
         cols = ['Academic Pressure', 'CGPA', 'Study Satisfaction',
@@ -147,6 +174,7 @@ def plot_missing_pattern_by_group(df, group_col='Working Professional or Student
     ax.set_title(f'% Missing theo nhóm ({group_col})', fontsize=14, fontweight='bold')
     ax.set_ylabel('')
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # Bảng chi tiết
@@ -160,7 +188,7 @@ def plot_missing_pattern_by_group(df, group_col='Working Professional or Student
             print(f"  {col}: {n_miss:,} missing ({pct:.1f}%)")
 
 
-def plot_numerical_distribution(df, col):
+def plot_numerical_distribution(df, col, save_path=None):
     """
     Vẽ histogram + KDE + boxplot cho 1 numerical feature.
     In kèm thống kê describe + skewness.
@@ -168,6 +196,7 @@ def plot_numerical_distribution(df, col):
     Args:
         df: DataFrame chứa dữ liệu.
         col: Tên cột numerical.
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     data = df[col].dropna()
 
@@ -188,6 +217,7 @@ def plot_numerical_distribution(df, col):
 
     plt.suptitle(f'📊 Phân tích: {col}', fontsize=15, fontweight='bold', y=1.02)
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # Thống kê
@@ -204,7 +234,7 @@ def plot_numerical_distribution(df, col):
     print("-" * 70)
 
 
-def plot_categorical_distribution(df, col, top_n=15):
+def plot_categorical_distribution(df, col, top_n=15, save_path=None):
     """
     Vẽ countplot + frequency table cho 1 categorical feature.
 
@@ -212,6 +242,7 @@ def plot_categorical_distribution(df, col, top_n=15):
         df: DataFrame chứa dữ liệu.
         col: Tên cột categorical.
         top_n: Số lượng categories tối đa hiển thị (mặc định 15).
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     value_counts = df[col].value_counts()
     n_unique = len(value_counts)
@@ -237,6 +268,7 @@ def plot_categorical_distribution(df, col, top_n=15):
 
     ax.set_xlim(0, plot_data.max() * 1.12)
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # Frequency table
@@ -250,7 +282,7 @@ def plot_categorical_distribution(df, col, top_n=15):
     print("=" * 70)
 
 
-def plot_numerical_vs_target(df, col, target='Depression'):
+def plot_numerical_vs_target(df, col, target='Depression', save_path=None):
     """
     Vẽ boxplot + KDE overlay so sánh phân phối numerical feature
     giữa 2 nhóm Depression.
@@ -259,6 +291,7 @@ def plot_numerical_vs_target(df, col, target='Depression'):
         df: DataFrame chứa dữ liệu.
         col: Tên cột numerical.
         target: Tên cột target (mặc định 'Depression').
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     data = df[[col, target]].dropna()
 
@@ -285,6 +318,7 @@ def plot_numerical_vs_target(df, col, target='Depression'):
 
     plt.suptitle(f'🔍 Bivariate: {col} vs Depression', fontsize=15, fontweight='bold', y=1.02)
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # Thống kê so sánh
@@ -295,7 +329,7 @@ def plot_numerical_vs_target(df, col, target='Depression'):
     print("-" * 70)
 
 
-def plot_categorical_vs_target(df, col, target='Depression', top_n=15):
+def plot_categorical_vs_target(df, col, target='Depression', top_n=15, save_path=None):
     """
     Vẽ grouped bar chart + tỷ lệ Depression theo từng category.
 
@@ -304,6 +338,7 @@ def plot_categorical_vs_target(df, col, target='Depression', top_n=15):
         col: Tên cột categorical.
         target: Tên cột target (mặc định 'Depression').
         top_n: Số categories tối đa hiển thị.
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     data = df[[col, target]].dropna()
 
@@ -345,17 +380,19 @@ def plot_categorical_vs_target(df, col, target='Depression', top_n=15):
     plt.suptitle(f'🔍 Bivariate: {col} vs Depression{suffix}',
                  fontsize=15, fontweight='bold', y=1.02)
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
     print("-" * 70)
 
 
-def plot_correlation_heatmap(corr_matrix, figsize=(14, 10)):
+def plot_correlation_heatmap(corr_matrix, figsize=(14, 10), save_path=None):
     """
     Vẽ correlation heatmap.
 
     Args:
         corr_matrix: Ma trận tương quan (output từ df.corr()).
         figsize: Kích thước biểu đồ.
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
 
@@ -370,10 +407,11 @@ def plot_correlation_heatmap(corr_matrix, figsize=(14, 10)):
     plt.xticks(rotation=45, ha='right', fontsize=11)
     plt.yticks(fontsize=11)
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
 
-def plot_top_correlations(corr_matrix, target='Depression', top_n=10):
+def plot_top_correlations(corr_matrix, target='Depression', top_n=10, save_path=None):
     """
     Vẽ bar chart top features tương quan mạnh nhất với target.
 
@@ -381,6 +419,7 @@ def plot_top_correlations(corr_matrix, target='Depression', top_n=10):
         corr_matrix: Ma trận tương quan.
         target: Tên biến target.
         top_n: Số lượng features hiển thị.
+        save_path: Đường dẫn lưu hình (nếu có).
     """
     if target not in corr_matrix.columns:
         print(f"⚠️ Cột '{target}' không có trong ma trận tương quan!")
@@ -406,6 +445,7 @@ def plot_top_correlations(corr_matrix, target='Depression', top_n=10):
                 ha='left' if width >= 0 else 'right', fontsize=10)
 
     plt.tight_layout()
+    _maybe_save(save_path)
     plt.show()
 
     # In bảng
