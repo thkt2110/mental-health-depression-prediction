@@ -1,0 +1,48 @@
+\section{Tổng quan dự án}
+\label{sec:overview}
+
+\subsection{Giới thiệu bài toán}
+
+Dự án này được lấy cảm hứng từ cuộc thi Kaggle \textit{``Playground Series --- Season 4, Episode 11: Exploring Mental Health Data''}~\cite{kaggle2024}. Mục tiêu chính là xây dựng mô hình học máy để dự đoán liệu một cá nhân có nguy cơ bị trầm cảm (\textit{Depression}) hay không, dựa trên dữ liệu khảo sát sức khỏe tâm thần.
+
+\textbf{Phát biểu bài toán:} Cho trước một tập dữ liệu gồm các đặc trưng nhân khẩu học, học vấn, nghề nghiệp và các yếu tố tâm lý --- xã hội, bài toán yêu cầu phân loại nhị phân (\textit{Binary Classification}) để dự đoán biến mục tiêu \texttt{Depression} nhận giá trị 0 (không trầm cảm) hoặc 1 (trầm cảm).
+
+\subsection{Mô tả dữ liệu}
+
+Bộ dữ liệu được cung cấp bởi Kaggle với các thông tin chính:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Tập huấn luyện (train)}: 140.700 mẫu với 20 đặc trưng và 1 biến mục tiêu
+    \item \textbf{Tập kiểm tra (test)}: 93.800 mẫu (không có nhãn)
+    \item \textbf{Tính chất}: Dữ liệu tổng hợp (\textit{synthetic}), được tạo từ mô hình deep learning huấn luyện trên dữ liệu khảo sát thực tế
+    \item \textbf{Metric đánh giá}: Accuracy (theo yêu cầu cuộc thi)
+\end{itemize}
+
+\subsection{Pipeline tổng thể}
+
+Hình~\ref{fig:pipeline} minh họa toàn bộ quy trình xử lý dữ liệu và xây dựng mô hình của dự án, bao gồm 6 giai đoạn chính từ dữ liệu thô đến kết quả dự đoán cuối cùng.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    block/.style={rectangle, rounded corners, draw=black!70, fill=blue!8,
+                  text width=3.2cm, minimum height=1cm, align=center, font=\small\bfseries},
+    arrow/.style={-{Stealth[length=3mm]}, thick, draw=black!60}
+]
+\node[block] (raw) {1. Dữ liệu thô\\(Raw Data)};
+\node[block, right=of raw] (eda) {2. Khám phá\\dữ liệu (EDA)};
+\node[block, right=of eda] (prep) {3. Tiền xử lý\\(Preprocessing)};
+\node[block, below=of prep] (fe) {4. Kỹ thuật\\đặc trưng (FE)};
+\node[block, left=of fe] (model) {5. Xây dựng\\mô hình};
+\node[block, left=of model] (eval) {6. Đánh giá\\(Evaluation)};
+
+\draw[arrow] (raw) -- (eda);
+\draw[arrow] (eda) -- (prep);
+\draw[arrow] (prep) -- (fe);
+\draw[arrow] (fe) -- (model);
+\draw[arrow] (model) -- (eval);
+\end{tikzpicture}
+\caption{Pipeline tổng thể của dự án dự đoán rủi ro trầm cảm}
+\label{fig:pipeline}
+\end{figure}

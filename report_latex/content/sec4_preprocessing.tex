@@ -1,0 +1,126 @@
+\section{Tiền xử lý dữ liệu}
+\label{sec:preprocessing}
+
+\subsection{Làm sạch dữ liệu bẩn (Noisy Data)}
+\label{subsec:noisy_data}
+
+Trong quá trình khám phá dữ liệu, nhóm tác giả phát hiện hai cột chứa dữ liệu bẩn nghiêm trọng do lỗi nhập liệu (\textit{data entry error}) hoặc hoán đổi cột (\textit{column swap}):
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Sleep Duration}: Có 36 giá trị unique thay vì 4 giá trị hợp lệ. Khoảng 79 mẫu chứa các giá trị bất thường như tên thành phố (\texttt{Pune}), tên cột (\texttt{Work\_Study\_Hours}), hoặc số giờ vô nghĩa (\texttt{45-48 hours}).
+    \item \textbf{Dietary Habits}: Có 23 giá trị unique thay vì 3 giá trị hợp lệ. Khoảng 27 mẫu chứa tên bằng cấp (\texttt{BSc}), giới tính (\texttt{Male}), hoặc các giá trị bị swap từ cột khác.
+\end{itemize}
+
+Chiến lược xử lý: ánh xạ (\textit{map}) các giá trị bẩn về category hợp lệ gần nhất dựa trên ngữ nghĩa; các giá trị không thể ánh xạ được thay thế bằng giá trị mode. Bảng~\ref{tab:noisy_data} tóm tắt kết quả trước và sau khi làm sạch.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả làm sạch dữ liệu bẩn}
+\label{tab:noisy_data}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Cột} & \textbf{Unique (trước)} & \textbf{Unique (sau)} & \textbf{Ví dụ giá trị bẩn} \\
+\midrule
+Sleep Duration & 36 & 4 & Pune, 45-48 hours, 10-6 hours \\
+Dietary Habits & 23 & 3 & BSc, Male, 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Xử lý Missing Values}
+\label{subsec:missing_values}
+
+Hình~\ref{fig:missing_values} trình bày tỷ lệ missing values theo từng cột. Ba cột có tỷ lệ missing cao nhất là Study Satisfaction, Academic Pressure và CGPA (đều 80,17\%), tiếp theo là Profession (26,03\%), Job Satisfaction và Work Pressure (đều 19,84\%).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{preprocessing/missing_values.png}
+\caption{Tỷ lệ Missing Values theo từng cột}
+\label{fig:missing_values}
+\end{figure}
+
+Điểm quan trọng là các giá trị missing này \textbf{không phải ngẫu nhiên} mà thuộc loại \textbf{MNAR} (\textit{Missing Not At Random}). Hình~\ref{fig:missing_pattern} chứng minh rõ: Academic Pressure, CGPA, Study Satisfaction chỉ có giá trị ở nhóm Student (100\% missing ở Working Professional), trong khi Work Pressure và Job Satisfaction chỉ có ở Working Professional (100\% missing ở Student). Đây là thiết kế có chủ đích của bộ dữ liệu, không phải lỗi thu thập.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{preprocessing/missing_pattern_by_group.png}
+\caption{Pattern Missing Values theo nhóm Working Professional vs Student}
+\label{fig:missing_pattern}
+\end{figure}
+
+\subsection{Gộp các cột điều kiện (Merge Conditional Columns)}
+\label{subsec:merge_columns}
+
+Do cơ chế MNAR được phát hiện ở Mục~\ref{subsec:missing_values}, việc điền missing bằng mean/median là \textbf{không phù hợp} --- vì giá trị missing mang ý nghĩa thực sự (sinh viên không có Work Pressure, người đi làm không có Academic Pressure). Nhóm tác giả áp dụng chiến lược gộp cột (\textit{merge}) như sau:
+
+\begin{itemize}[noitemsep]
+    \item \texttt{Academic Pressure} + \texttt{Work Pressure} $\rightarrow$ \texttt{Pressure}: gộp thành một biến thống nhất đo mức áp lực chung.
+    \item \texttt{Study Satisfaction} + \texttt{Job Satisfaction} $\rightarrow$ \texttt{Satisfaction}: gộp thành biến đo mức hài lòng chung.
+    \item \texttt{CGPA}: giữ nguyên, đồng thời tạo thêm biến nhị phân \texttt{has\_cgpa} để đánh dấu đối tượng là sinh viên hay không.
+\end{itemize}
+
+Kết quả: số lượng đặc trưng giảm từ 20 xuống 17, đồng thời loại bỏ hoàn toàn vấn đề missing values cho 5 cột điều kiện.
+
+\subsection{Loại bỏ đặc trưng không cần thiết}
+\label{subsec:drop_features}
+
+Cột \texttt{Name} được loại bỏ vì chứa thông tin định danh cá nhân, không có giá trị dự đoán cho biến mục tiêu Depression.
+
+\subsection{Mã hóa biến phân loại (Encoding Categorical Variables)}
+\label{subsec:encoding}
+
+Các biến phân loại được mã hóa theo hai phương pháp phù hợp:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Binary Encoding}: Áp dụng cho các biến nhị phân --- \texttt{Gender} (Male=1, Female=0), \texttt{Suicidal Thoughts} (Yes=1, No=0), \texttt{Family History} (Yes=1, No=0), \texttt{Working Professional or Student} (Student=0, Professional=1).
+    \item \textbf{Ordinal Encoding}: Áp dụng cho các biến có thứ tự tự nhiên --- \texttt{Sleep Duration} (Less than 5h=0, 5-6h=1, 7-8h=2, More than 8h=3) và \texttt{Dietary Habits} (Unhealthy=0, Moderate=1, Healthy=2).
+\end{itemize}
+
+Lý do không sử dụng One-Hot Encoding: các biến này có thứ tự rõ ràng (ít $\rightarrow$ nhiều, xấu $\rightarrow$ tốt), ordinal encoding bảo toàn thông tin thứ tự này.
+
+\subsection{Chuẩn hóa đặc trưng (Feature Scaling)}
+\label{subsec:scaling}
+
+Chuẩn hóa đặc trưng chỉ cần thiết cho các mô hình nhạy cảm với thang đo như Logistic Regression và SVM. Các mô hình tree-based (Decision Tree, Random Forest, XGBoost, LightGBM) không yêu cầu chuẩn hóa.
+
+\textbf{Standardization} (Z-score normalization) --- biến đổi dữ liệu về phân phối chuẩn với trung bình $\mu = 0$ và độ lệch chuẩn $\sigma = 1$:
+
+\begin{equation}
+z = \frac{x - \mu}{\sigma}
+\label{eq:standardization}
+\end{equation}
+
+trong đó $x$ là giá trị gốc, $\mu$ là trung bình mẫu và $\sigma$ là độ lệch chuẩn mẫu của đặc trưng.
+
+\textbf{Min-Max Normalization} --- co giãn giá trị về khoảng $[0, 1]$:
+
+\begin{equation}
+x' = \frac{x - x_{\min}}{x_{\max} - x_{\min}}
+\label{eq:minmax}
+\end{equation}
+
+trong đó $x_{\min}$ và $x_{\max}$ lần lượt là giá trị nhỏ nhất và lớn nhất của đặc trưng trong tập huấn luyện.
+
+Trong dự án này, nhóm tác giả sử dụng \textbf{Standardization} (Phương trình~\ref{eq:standardization}) cho Logistic Regression và SVM vì phương pháp này ít bị ảnh hưởng bởi outliers hơn Min-Max.
+
+\subsection{Kết quả tiền xử lý}
+\label{subsec:preprocessing_result}
+
+Bảng~\ref{tab:preprocessing_result} tóm tắt kết quả trước và sau quá trình tiền xử lý dữ liệu.
+
+\begin{table}[H]
+\centering
+\caption{So sánh dữ liệu trước và sau tiền xử lý}
+\label{tab:preprocessing_result}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Tiêu chí} & \textbf{Trước} & \textbf{Sau} \\
+\midrule
+Số đặc trưng & 20 & 17 \\
+Số dòng (train) & 140.700 & 140.700 \\
+Missing values & Có (5 cột, lên tới 80\%) & 0 \\
+Noisy data & Có (2 cột) & 0 \\
+Kiểu dữ liệu & Hỗn hợp (text + số) & Hoàn toàn số \\
+\bottomrule
+\end{tabular}
+\end{table}

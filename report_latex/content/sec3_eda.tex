@@ -1,0 +1,142 @@
+\section{Khám phá dữ liệu (EDA)}
+\label{sec:eda}
+
+\subsection{Tổng quan Dataset}
+\label{subsec:dataset_overview}
+
+Bộ dữ liệu bao gồm 140.700 mẫu huấn luyện và 93.800 mẫu kiểm tra với 20 đặc trưng đầu vào. Bảng~\ref{tab:features} trình bày danh sách các đặc trưng cùng kiểu dữ liệu và ý nghĩa tương ứng.
+
+\begin{table}[H]
+\centering
+\caption{Danh sách các đặc trưng trong bộ dữ liệu}
+\label{tab:features}
+\small
+\begin{tabular}{llp{7.5cm}}
+\toprule
+\textbf{Tên đặc trưng} & \textbf{Kiểu} & \textbf{Ý nghĩa} \\
+\midrule
+Name & Text & Tên người tham gia khảo sát \\
+Age & Numerical & Tuổi \\
+Gender & Categorical & Giới tính (Male / Female) \\
+City & Categorical & Thành phố sinh sống \\
+Working Professional or Student & Categorical & Đang đi làm hay sinh viên \\
+Profession & Categorical & Nghề nghiệp \\
+Degree & Categorical & Trình độ học vấn \\
+Academic Pressure & Numerical & Áp lực học tập (1--5) \\
+Work Pressure & Numerical & Áp lực công việc (1--5) \\
+CGPA & Numerical & Điểm trung bình tích lũy \\
+Study Satisfaction & Numerical & Mức hài lòng với việc học (1--5) \\
+Job Satisfaction & Numerical & Mức hài lòng với công việc (1--5) \\
+Sleep Duration & Categorical & Thời lượng ngủ \\
+Dietary Habits & Categorical & Thói quen ăn uống \\
+Have you ever had suicidal thoughts? & Binary & Từng có suy nghĩ tự tử \\
+Work/Study Hours & Numerical & Số giờ làm việc / học mỗi ngày \\
+Financial Stress & Numerical & Mức độ căng thẳng tài chính (1--5) \\
+Family History of Mental Illness & Binary & Gia đình có tiền sử bệnh tâm thần \\
+\midrule
+\textbf{Depression} & \textbf{Binary} & \textbf{Biến mục tiêu: 0 = Không, 1 = Có} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Phân tích biến mục tiêu}
+\label{subsec:target_analysis}
+
+Hình~\ref{fig:target_dist} cho thấy phân phối của biến mục tiêu \texttt{Depression}. Tập dữ liệu có sự mất cân bằng đáng kể: 115.133 mẫu thuộc lớp 0 (không trầm cảm, chiếm 81,8\%) và 25.567 mẫu thuộc lớp 1 (trầm cảm, chiếm 18,2\%). Tỷ lệ mất cân bằng xấp xỉ 4,5:1, đây là mức mất cân bằng vừa phải (\textit{moderate imbalance}) và cần được lưu ý trong quá trình huấn luyện mô hình.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{eda/target_distribution.png}
+\caption{Phân phối biến mục tiêu Depression: biểu đồ cột (trái) và biểu đồ tròn (phải)}
+\label{fig:target_dist}
+\end{figure}
+
+\subsection{Phân tích đặc trưng --- Bivariate Analysis}
+\label{subsec:bivariate}
+
+Để hiểu mối quan hệ giữa từng đặc trưng với biến mục tiêu, nhóm tác giả tiến hành phân tích hai biến (\textit{bivariate analysis}) cho các đặc trưng quan trọng nhất.
+
+\textbf{Age vs Depression} (Hình~\ref{fig:age_vs_dep}): Tuổi là đặc trưng có tương quan mạnh nhất với Depression ($r = -0,565$). Nhóm tuổi trẻ (18--30) có tỷ lệ trầm cảm cao hơn rõ rệt so với nhóm tuổi lớn hơn. Phân phối KDE cho thấy sự phân tách rõ ràng giữa hai lớp: nhóm trầm cảm tập trung ở độ tuổi 20--30, trong khi nhóm không trầm cảm phân bố đều hơn.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{eda/plot_numerical_vs_target_Age.png}
+\caption{Phân tích Age vs Depression: boxplot (trái) và KDE (phải)}
+\label{fig:age_vs_dep}
+\end{figure}
+
+\textbf{Academic Pressure vs Depression} (Hình~\ref{fig:acad_vs_dep}): Áp lực học tập có tương quan dương mạnh với Depression ($r = 0,475$). Nhóm trầm cảm có median Academic Pressure = 4, trong khi nhóm không trầm cảm có median = 2. Phân phối KDE minh họa rõ: nhóm không trầm cảm tập trung ở mức thấp (1--2), nhóm trầm cảm thiên về mức cao (4--5).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{eda/plot_numerical_vs_target_Academic_Pressure.png}
+\caption{Phân tích Academic Pressure vs Depression: boxplot (trái) và KDE (phải)}
+\label{fig:acad_vs_dep}
+\end{figure}
+
+\textbf{Suicidal Thoughts vs Depression} (Hình~\ref{fig:suicidal_vs_dep}): Đây là đặc trưng nhị phân có khả năng phân biệt mạnh nhất. Trong nhóm từng có suy nghĩ tự tử, tỷ lệ trầm cảm là 31,8\%, cao gấp 6,5 lần so với nhóm chưa từng (4,9\%). Kết quả này phù hợp với kiến thức y học: suy nghĩ tự tử là một trong những dấu hiệu cảnh báo quan trọng nhất của trầm cảm.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{eda/suicidal_vs_dep.png}
+\caption{Phân tích Suicidal Thoughts vs Depression: tỷ lệ (trái) và depression rate (phải)}
+\label{fig:suicidal_vs_dep}
+\end{figure}
+
+\subsection{Phân tích tương quan}
+\label{subsec:correlation}
+
+Hình~\ref{fig:corr_heatmap} trình bày ma trận tương quan Pearson giữa các đặc trưng số. Một số quan sát đáng chú ý:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Age} có tương quan âm mạnh nhất với Depression ($r = -0,565$), cho thấy người trẻ tuổi có nguy cơ trầm cảm cao hơn.
+    \item \textbf{Academic Pressure} có tương quan dương mạnh ($r = 0,475$).
+    \item \textbf{Job Satisfaction} và \textbf{Study Satisfaction} có $r = -1,0$ --- đây là hiện tượng multicollinearity hoàn hảo do cơ chế sinh dữ liệu (hai biến này thuộc hai nhóm đối tượng khác nhau), cần được xử lý bằng cách merge ở bước tiền xử lý.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{eda/correlation_heatmap.png}
+\caption{Ma trận tương quan Pearson giữa các đặc trưng số}
+\label{fig:corr_heatmap}
+\end{figure}
+
+Hình~\ref{fig:top_corr} xếp hạng các đặc trưng theo mức tương quan tuyệt đối với Depression. Năm đặc trưng có tương quan mạnh nhất lần lượt là: Age ($-0,565$), Academic Pressure ($0,475$), Financial Stress ($0,227$), Work Pressure ($0,217$) và Work/Study Hours ($0,192$).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{eda/top_correlations.png}
+\caption{Top đặc trưng có tương quan mạnh nhất với Depression}
+\label{fig:top_corr}
+\end{figure}
+
+\subsection{Phân tích đa biến (Multivariate Analysis)}
+\label{subsec:multivariate}
+
+Ngoài phân tích từng đặc trưng riêng lẻ, nhóm tác giả khám phá các tương tác đa biến (\textit{interaction patterns}) để hiểu sâu hơn về cơ chế tác động lên Depression.
+
+\textbf{Suicidal Thoughts $\times$ Family History $\rightarrow$ Depression} (Hình~\ref{fig:multi_suicidal_family}): Kết quả cho thấy hiệu ứng cộng gộp rõ ràng. Khi cả hai yếu tố cùng xuất hiện (Suicidal Thoughts = Yes, Family History = Yes), tỷ lệ trầm cảm đạt 32,6\%. Ngược lại, khi cả hai đều không có, tỷ lệ chỉ 4,7\%. Đặc biệt, yếu tố Suicidal Thoughts đóng vai trò quyết định hơn Family History: nhóm (Yes, No) có tỷ lệ 30,9\% trong khi nhóm (No, Yes) chỉ 5,0\%.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{eda/multivariate_suicidal_family.png}
+\caption{Tương tác Suicidal Thoughts $\times$ Family History và tỷ lệ Depression}
+\label{fig:multi_suicidal_family}
+\end{figure}
+
+Các interaction patterns này là \textbf{tiền đề trực tiếp} cho việc tạo các đặc trưng tương tác (\textit{interaction features}) ở Mục~\ref{sec:feature_eng}, cụ thể là đặc trưng \texttt{risk\_score} kết hợp Suicidal Thoughts và Family History.
+
+\subsection{Các phát hiện chính}
+\label{subsec:key_findings}
+
+Từ quá trình khám phá dữ liệu, nhóm tác giả rút ra các phát hiện quan trọng sau:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Tuổi là yếu tố dự đoán mạnh nhất}: Người trẻ (18--30 tuổi) có nguy cơ trầm cảm cao gấp nhiều lần so với nhóm trung niên và lớn tuổi.
+    \item \textbf{Dữ liệu mất cân bằng vừa phải}: Tỷ lệ 81,8\% vs 18,2\% cần được cân nhắc khi đánh giá mô hình.
+    \item \textbf{Áp lực học tập/công việc và căng thẳng tài chính} có tương quan dương đáng kể với trầm cảm.
+    \item \textbf{Suy nghĩ tự tử} là dấu hiệu cảnh báo mạnh nhất trong các đặc trưng nhị phân.
+    \item \textbf{Missing values có cấu trúc MNAR}: 5 cột chỉ tồn tại cho một nhóm đối tượng (sinh viên hoặc người đi làm), cần chiến lược xử lý đặc biệt.
+    \item \textbf{Dữ liệu bẩn (noisy data)}: Cột Sleep Duration và Dietary Habits chứa các giá trị lỗi do swap dữ liệu.
+    \item \textbf{Hiệu ứng tương tác đa biến}: Sự kết hợp nhiều yếu tố rủi ro làm tăng đáng kể tỷ lệ trầm cảm, gợi ý việc tạo interaction features.
+\end{enumerate}

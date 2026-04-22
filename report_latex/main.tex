@@ -1,0 +1,89 @@
+\documentclass[12pt]{article}
+
+\usepackage{hcmus-report-template}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{dirtree}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
+% Disable indentation on new paragraphs
+\setlength{\parindent}{0pt}
+
+% Line spacing 1.5
+\renewcommand{\baselinestretch}{1.5}
+
+% Graphic path
+\graphicspath{{img/}}
+
+% To use Times font family, uncomment this row
+% \usepackage{mathptmx}
+
+% To use roman section / subsection, uncomment these rows
+% \renewcommand{\thesection}{\Roman{section}}
+% \renewcommand{\thesubsection}{\thesection.\Roman{subsection}}
+
+% Define course name, report name and report title.
+\newcommand{\coursename}{CSC17001 - Phân tích dữ liệu thông minh}
+\newcommand{\reportname}{Exploring Mental Health}
+\newcommand{\reporttitle}{BÁO CÁO ĐỒ ÁN THỰC HÀNH}
+
+\newcommand{\studentname}{Trần Hữu Kim Thành - 23120166 \\ Đàm Tiến Đạt - 23120118 \\ Triệu Tuấn Kiệt - 23120137 \\ Lê Nhật Minh Tâm - 23120163 \\ Nguyễn Hồ Anh Tuấn - 23120185}
+\newcommand{\teachername}{Thầy Nguyễn Thanh Tình}
+
+% Header
+\lhead{\reporttitle}
+\rhead{
+Trường Đại học Khoa học Tự nhiên - ĐHQG HCM\\
+\coursename
+}
+
+% Footer
+
+
+% ============ DOCUMENT ============
+\begin{document}
+
+\pagenumbering{roman}
+\input{content/title}
+
+\cleardoublepage
+\pagenumbering{roman}
+\pagestyle{empty} 
+
+\tableofcontents
+\cleardoublepage
+
+\listoffigures
+\cleardoublepage
+
+\listoftables
+\cleardoublepage
+
+\pagenumbering{arabic} 
+\pagestyle{plain}
+      
+\setcounter{page}{1}
+
+\input{content/sec1_planning}
+\input{content/sec2_overview}
+\input{content/sec3_eda}
+\input{content/sec4_preprocessing}
+\input{content/sec5_feature_eng}
+\input{content/sec6_model_dev}
+\input{content/sec7_experiments}
+\input{content/sec8_conclusion}
+
+% References
+\input{content/sec9_references}
+
+% Appendix
+% \appendix
+% \input{appendix/appendix.tex}
+\end{document}
