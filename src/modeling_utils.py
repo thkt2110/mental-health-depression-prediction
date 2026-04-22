@@ -111,6 +111,7 @@ def manual_model_search(
     best_params = None
     best_metrics = None
     best_score = -np.inf
+    best_f1 = -np.inf
 
     for trial_idx, params in enumerate(ParameterGrid(param_grid), start=1):
         estimator = model_factory(**params)
@@ -126,8 +127,13 @@ def manual_model_search(
         rows.append(row)
 
         score = metrics[sort_metric]
-        if score > best_score:
+        f1 = metrics["f1_mean"]
+
+        # Keep best selection consistent with final table sorting:
+        # primary metric first, then F1 as deterministic tie-breaker.
+        if (score > best_score) or (np.isclose(score, best_score) and f1 > best_f1):
             best_score = score
+            best_f1 = f1
             best_params = dict(params)
             best_metrics = metrics
 
