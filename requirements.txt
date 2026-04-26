@@ -5,11 +5,9 @@ seaborn
 scikit-learn
 xgboost
 lightgbm
-catboost
 shap
-optuna
 jupyter
 ipykernel
-python-dotenv
 category_encoders
 pyarrow
+fastparquet

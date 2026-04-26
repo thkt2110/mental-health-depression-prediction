@@ -148,6 +148,7 @@ cython_debug/
 .vscode/
 
 # Project-specific ignores
+scripts/
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
