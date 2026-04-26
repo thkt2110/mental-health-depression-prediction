@@ -1,0 +1,223 @@
+\section{Thực nghiệm và kết quả}
+\label{sec:experiments}
+
+\subsection{So sánh tổng thể các mô hình}
+\label{subsec:model_comparison}
+
+Bảng~\ref{tab:model_comparison} trình bày kết quả đánh giá toàn bộ 6 mô hình trên 5-Fold Stratified Cross-Validation. Hình~\ref{fig:model_comparison} trực quan hóa so sánh theo hai metric chính: Accuracy và F1-score.
+
+\begin{table}[H]
+\centering
+\caption{So sánh hiệu suất các mô hình (5-Fold Stratified CV)}
+\label{tab:model_comparison}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Mô hình} & \textbf{Accuracy} & \textbf{F1-score} \\
+\midrule
+Logistic Regression & 0,9376 & 0,8243 \\
+Decision Tree (depth=10) & 0,9292 & 0,8011 \\
+Random Forest (200 trees) & 0,9364 & 0,8208 \\
+SVM (linear) & 0,9367 & 0,8230 \\
+\midrule
+\textbf{XGBoost (tuned)} & \textbf{0,9396} & \textbf{0,8312} \\
+LightGBM (tuned) & 0,9392 & 0,8306 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{evaluation/model_comparison.png}
+\caption{So sánh Accuracy (trái) và F1-score (phải) giữa các mô hình Baseline và Advanced}
+\label{fig:model_comparison}
+\end{figure}
+
+\textbf{Nhận xét}: XGBoost (tuned) đạt Accuracy cao nhất (93,96\%) và F1-score cao nhất (0,8312). Tuy nhiên, sự chênh lệch giữa các mô hình tương đối nhỏ ($< 1\%$ Accuracy giữa Baseline và Advanced). Có ba nguyên nhân chính giải thích điều này:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Feature Engineering chất lượng cao}: Bước tạo đặc trưng tương tác (Mục~\ref{subsec:interaction_features}) và Age Binning đã ``giúp sẵn'' các mô hình đơn giản nắm bắt được các pattern phi tuyến --- giảm lợi thế vốn có của mô hình phức tạp.
+    \item \textbf{Đặc tính dữ liệu}: Bộ dữ liệu synthetic có cấu trúc tương đối sạch và pattern rõ ràng (Age là đặc trưng chi phối, $r = -0{,}565$), khiến ngay cả mô hình tuyến tính cũng phân tách tốt.
+    \item \textbf{Manual Tuning bảo thủ}: Phương pháp tuning thủ công không khai thác triệt để không gian siêu tham số như Grid Search hay Bayesian Optimization, dẫn đến mô hình nâng cao chưa đạt tiềm năng tối đa. Tuy nhiên, điều này cũng giúp tránh overfitting.
+\end{itemize}
+
+Dù chênh lệch Accuracy nhỏ, XGBoost vẫn cải thiện đáng kể ở F1-score (+1,0\% so với Logistic Regression), cho thấy khả năng phân loại lớp thiểu số (Depression = 1) tốt hơn.
+
+
+\subsection{Confusion Matrix}
+\label{subsec:confusion_matrix}
+
+Ma trận nhầm lẫn (\textit{Confusion Matrix}) có cấu trúc tổng quát:
+
+\begin{equation}
+\text{Confusion Matrix} = \begin{bmatrix} TN & FP \\ FN & TP \end{bmatrix}
+\label{eq:cm}
+\end{equation}
+
+Hình~\ref{fig:confusion_matrix} trình bày Confusion Matrix của mô hình XGBoost trên toàn bộ tập huấn luyện (OOF predictions --- Out-of-Fold, tức dự đoán trên validation fold trong quá trình Cross-Validation):
+
+\begin{figure}[H]
+\centering
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/confusion_matrix.png}}}
+\vspace{5pt}
+\caption{Confusion Matrix --- XGBoost (OOF Predictions)}
+\label{fig:confusion_matrix}
+\end{figure}
+
+\textbf{Phân tích chi tiết}:
+\begin{itemize}[noitemsep]
+    \item $TN = 111.256$: 96,6\% mẫu không trầm cảm được dự đoán đúng.
+    \item $TP = 20.932$: 81,9\% mẫu trầm cảm được phát hiện chính xác.
+    \item $FP = 3.877$: 3,4\% mẫu không trầm cảm bị dự đoán nhầm là trầm cảm (\textit{false alarm}).
+    \item $FN = 4.635$: 18,1\% mẫu trầm cảm bị bỏ sót --- đây là con số \textbf{đáng lo ngại nhất} trong bài toán y tế, vì bỏ sót người bệnh có thể dẫn đến hậu quả nghiêm trọng.
+\end{itemize}
+
+\subsection{Classification Report}
+\label{subsec:classification_report}
+
+Bảng~\ref{tab:classification_report} trình bày báo cáo phân loại chi tiết cho từng lớp:
+
+\begin{table}[H]
+\centering
+\caption{Classification Report --- XGBoost (OOF)}
+\label{tab:classification_report}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Lớp} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} & \textbf{Support} \\
+\midrule
+0 (Không trầm cảm) & 0,9600 & 0,9663 & 0,9632 & 115.133 \\
+1 (Trầm cảm) & 0,8437 & 0,8187 & 0,8310 & 25.567 \\
+\midrule
+\textbf{Accuracy} & \multicolumn{4}{c}{\textbf{0,9395}} \\
+Macro avg & 0,9019 & 0,8925 & 0,8971 & 140.700 \\
+Weighted avg & 0,9389 & 0,9395 & 0,9391 & 140.700 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Phân tích trade-off Precision vs Recall}: Đối với lớp 1 (Trầm cảm), Recall = 0,819 cho thấy mô hình phát hiện được ~82\% ca trầm cảm. Trong bối cảnh sàng lọc sức khỏe tâm thần, việc nâng cao Recall (giảm False Negative) có ý nghĩa quan trọng hơn Precision, vì bỏ sót một ca bệnh nguy hiểm hơn so với cảnh báo nhầm.
+
+\subsection{ROC-AUC Curve}
+\label{subsec:roc_auc}
+
+Đường cong ROC (\textit{Receiver Operating Characteristic}) biểu diễn mối quan hệ giữa True Positive Rate (Recall) và False Positive Rate khi thay đổi ngưỡng phân loại. Diện tích dưới đường cong:
+
+\begin{equation}
+\text{AUC} = \int_0^1 \text{TPR}(t)\, d\text{FPR}(t)
+\label{eq:auc}
+\end{equation}
+
+trong đó $\text{TPR}(t) = \frac{TP}{TP + FN}$ và $\text{FPR}(t) = \frac{FP}{FP + TN}$ tại ngưỡng $t$.
+
+\begin{figure}[H]
+\centering
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/roc_curve.png}}}
+\vspace{5pt}
+\caption{Đường cong ROC --- XGBoost (OOF), AUC = 0,9751}
+\label{fig:roc_curve}
+\end{figure}
+
+XGBoost đạt \textbf{AUC = 0,9751}, rất gần giá trị tối ưu 1,0. Điều này có nghĩa: khi chọn ngẫu nhiên một mẫu trầm cảm và một mẫu không trầm cảm, mô hình cho mẫu trầm cảm xác suất dự đoán cao hơn mẫu không trầm cảm trong 97,51\% trường hợp. Đường cong nằm rất xa đường chéo (random classifier, AUC = 0,5), xác nhận khả năng phân biệt xuất sắc của mô hình.
+
+\subsection{Feature Importance và SHAP Analysis}
+\label{subsec:shap}
+
+\subsubsection{Feature Importance (Built-in)}
+
+Hình~\ref{fig:builtin_fi} so sánh Feature Importance (Gain) giữa XGBoost và LightGBM. Một số quan sát quan trọng:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{XGBoost} đặt trọng số cao nhất cho \texttt{age\_group} (0,34) và \texttt{Suicidal Thoughts} (0,22), cho thấy mô hình phụ thuộc mạnh vào nhóm tuổi và yếu tố tâm lý.
+    \item \textbf{LightGBM} phân bổ importance đồng đều hơn, với \texttt{Age} đứng đầu. Đặc biệt, LightGBM đánh giá cao các đặc trưng Target Encoded (\texttt{City\_te}, \texttt{Profession\_te}).
+    \item Sự khác biệt phản ánh chiến lược growth khác nhau: Level-wise (XGBoost) vs Leaf-wise (LightGBM).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{evaluation/builtin_fi.png}
+\caption{So sánh Built-in Feature Importance (Gain): XGBoost (trái) vs LightGBM (phải)}
+\label{fig:builtin_fi}
+\end{figure}
+
+\subsubsection{SHAP Summary Plot}
+
+SHAP (SHapley Additive exPlanations)~\cite{lundberg2017shap} cung cấp giải thích toàn cục (\textit{global interpretation}) về cách mỗi đặc trưng ảnh hưởng đến dự đoán. Hình~\ref{fig:shap_summary} trình bày SHAP summary plot (dot plot) cho XGBoost:
+
+\begin{figure}[H]
+\centering
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.63\textwidth]{evaluation/shap_summary.png}}}
+\vspace{5pt}
+\caption{SHAP Summary Plot --- XGBoost: mỗi điểm là một mẫu, màu đỏ = giá trị cao, xanh = giá trị thấp}
+\label{fig:shap_summary}
+\end{figure}
+
+\textbf{Phân tích chiều tác động}:
+\begin{itemize}[noitemsep]
+    \item \textbf{Age}: Giá trị thấp (đỏ, bên phải) $\rightarrow$ SHAP dương mạnh $\rightarrow$ \textit{người trẻ có rủi ro trầm cảm cao}. Giá trị cao (xanh, bên trái) $\rightarrow$ SHAP âm lớn $\rightarrow$ \textit{người lớn tuổi có rủi ro thấp}. Đây là pattern rất rõ ràng, phù hợp với kết quả EDA.
+    \item \textbf{Suicidal Thoughts}: Giá trị cao (đỏ) $\rightarrow$ SHAP dương mạnh (+0,85 trung bình) $\rightarrow$ \textit{yếu tố rủi ro đáng kể}.
+    \item \textbf{cgpa\_pressure}: Giá trị cao $\rightarrow$ SHAP dương $\rightarrow$ \textit{sinh viên có CGPA × áp lực cao có nguy cơ trầm cảm cao hơn}.
+    \item \textbf{stress\_load}: Tương tự, căng thẳng tổng hợp cao đẩy dự đoán về phía trầm cảm.
+\end{itemize}
+
+\subsubsection{SHAP Bar Plot}
+
+Hình~\ref{fig:shap_bar} xếp hạng các đặc trưng theo giá trị $\text{mean}(|\text{SHAP}|)$, phản ánh mức ảnh hưởng trung bình tuyệt đối lên kết quả dự đoán:
+
+\begin{figure}[H]
+\centering
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.63\textwidth]{evaluation/shap_bar.png}}}
+\vspace{5pt}
+\caption{Mean $|\text{SHAP}|$ --- Xếp hạng tầm quan trọng đặc trưng theo SHAP}
+\label{fig:shap_bar}
+\end{figure}
+
+Top 5 đặc trưng theo SHAP: \texttt{Age} (+1,96), \texttt{Suicidal Thoughts} (+0,85), \texttt{cgpa\_pressure} (+0,49), \texttt{stress\_load} (+0,39), \texttt{Profession\_te} (+0,34). Thứ tự này phần lớn nhất quán với Feature Importance built-in, nhưng SHAP cung cấp thêm thông tin về \textit{chiều tác động} (dương/âm) mà built-in importance không có.
+
+\subsubsection{SHAP Waterfall --- Phân tích ca cụ thể}
+
+Để minh họa khả năng giải thích ở mức \textit{individual prediction}, nhóm chọn hai ca cụ thể:
+
+\textbf{Ca A --- Người bị trầm cảm} (Hình~\ref{fig:waterfall_a}): Đối tượng 26 tuổi, có suy nghĩ tự tử, stress\_load = 20, CGPA = 5,24. Mô hình dự đoán xác suất trầm cảm $P = 0,975$ (rất cao). Các yếu tố đóng góp lớn nhất: Age = 26 (+1,16), Suicidal Thoughts = 1 (+0,63), stress\_load = 20 (+0,59). Tất cả các đặc trưng đều đẩy dự đoán theo hướng ``trầm cảm'', phù hợp với profile lâm sàng của một thanh niên có nhiều yếu tố rủi ro.
+
+\begin{figure}[H]
+\centering
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/waterfall_a.png}}}
+\vspace{5pt}
+\caption{SHAP Waterfall --- Ca A: Đối tượng trầm cảm (26 tuổi, $P = 0,975$)}
+\label{fig:waterfall_a}
+\end{figure}
+
+\textbf{Ca B --- Người không bị trầm cảm} (Hình~\ref{fig:waterfall_b}): Đối tượng 59 tuổi, stress\_load = 4, wellbeing\_index = 3,5. Mô hình dự đoán $P = 0,000$ (rất thấp). Yếu tố bảo vệ mạnh nhất: Age = 59 ($-4,0$), Profession\_te ($-1,33$), age\_group = 3 ($-0,46$). Mặc dù có suy nghĩ tự tử (+0,52) và hours\_pressure\_ratio cao (+0,41), tuổi lớn và mức stress thấp đã ``trung hòa'' hoàn toàn các yếu tố rủi ro.
+
+\begin{figure}[H]
+\centering
+{\setlength{\fboxsep}{3pt}\setlength{\fboxrule}{0.4pt}%
+\fbox{\includegraphics[width=0.58\textwidth]{evaluation/waterfall_b.png}}}
+\vspace{5pt}
+\caption{SHAP Waterfall --- Ca B: Đối tượng không trầm cảm (59 tuổi, $P = 0,000$)}
+\label{fig:waterfall_b}
+\end{figure}
+
+Hai ca trên cho thấy mô hình XGBoost không chỉ đạt hiệu suất cao mà còn có khả năng \textbf{giải thích được} (\textit{interpretable}), với logic phù hợp với kiến thức lâm sàng về sức khỏe tâm thần.
+
+\subsection{Dự đoán trên tập kiểm tra và Submission}
+\label{subsec:submission}
+
+Mô hình XGBoost (best model) được sử dụng để dự đoán trên toàn bộ 93.800 mẫu của tập kiểm tra. Quy trình end-to-end bao gồm: tiền xử lý dữ liệu test (cùng pipeline với train) $\rightarrow$ Feature Engineering $\rightarrow$ dự đoán bằng XGBoost $\rightarrow$ tạo file \texttt{submission.csv} theo format Kaggle (\texttt{id}, \texttt{Depression}).
+
+Kết quả submission chứng minh pipeline hoạt động \textbf{ổn định từ đầu đến cuối} trên dữ liệu chưa từng thấy, không gặp lỗi encoding, missing values, hay các vấn đề tương thích.
+
+\subsection{Nhận xét và phân tích tổng hợp}
+\label{subsec:analysis}
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Mô hình tốt nhất}: XGBoost (tuned) với Accuracy = 93,96\%, F1 = 0,8312, AUC = 0,9751.
+    \item \textbf{Cải thiện từ Advanced Models}: XGBoost cải thiện +0,2\% Accuracy và +1,0\% F1 so với Logistic Regression baseline, cho thấy giá trị của việc sử dụng mô hình phi tuyến.
+    \item \textbf{Feature Engineering hiệu quả}: Các đặc trưng mới (\texttt{stress\_load}, \texttt{cgpa\_pressure}, \texttt{age\_group}) đều xuất hiện trong top 10 quan trọng nhất, xác nhận hiệu quả của bước Feature Engineering.
+    \item \textbf{Điểm mạnh}: Pipeline hoàn chỉnh, xử lý tốt noisy data và MNAR missing values, mô hình có khả năng giải thích cao nhờ SHAP.
+    \item \textbf{Hạn chế}: Dữ liệu synthetic có thể không phản ánh đầy đủ phức tạp của thực tế; chưa thử nghiệm các kỹ thuật xử lý imbalanced data (SMOTE, class weighting).
+\end{enumerate}

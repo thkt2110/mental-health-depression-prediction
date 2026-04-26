@@ -1,0 +1,120 @@
+\section{Phát triển mô hình}
+\label{sec:model_dev}
+
+\subsection{Cài đặt thực nghiệm chung}
+\label{subsec:experiment_setup}
+
+\textbf{Chiến lược đánh giá}: Toàn bộ các mô hình được đánh giá bằng \textbf{5-Fold Stratified Cross-Validation}. Phương pháp Stratified đảm bảo tỷ lệ lớp Depression (0/1) được giữ nguyên trong mỗi fold, rất quan trọng khi dữ liệu mất cân bằng (81,8\% vs 18,2\%).
+
+\textbf{Thư viện}: scikit-learn (v1.3+), xgboost (v2.0+), lightgbm (v4.0+).
+
+\textbf{Chiến lược tuning}: Nhóm sử dụng phương pháp \textbf{Manual Hyperparameter Tuning} --- tức là chọn và điều chỉnh siêu tham số dựa trên hiểu biết về đặc tính mô hình và quan sát thực nghiệm, thay vì sử dụng các kỹ thuật tìm kiếm tự động (Grid Search, Random Search, Bayesian Optimization). Lý do: phương pháp thủ công giúp nhóm hiểu sâu hơn về ảnh hưởng của từng siêu tham số lên hiệu suất mô hình, đồng thời phù hợp hơn với mục tiêu học thuật của đồ án.
+
+\textbf{Các chỉ số đánh giá} được sử dụng bao gồm:
+
+\begin{equation}
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\label{eq:accuracy}
+\end{equation}
+
+\begin{equation}
+\text{Precision} = \frac{TP}{TP + FP}, \qquad \text{Recall} = \frac{TP}{TP + FN}
+\label{eq:prec_recall}
+\end{equation}
+
+\begin{equation}
+F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\label{eq:f1}
+\end{equation}
+
+trong đó $TP$ (True Positive) là số mẫu trầm cảm được dự đoán đúng, $TN$ (True Negative) là số mẫu không trầm cảm được dự đoán đúng, $FP$ (False Positive) là số mẫu bị dự đoán nhầm là trầm cảm, và $FN$ (False Negative) là số mẫu trầm cảm bị bỏ sót.
+
+Accuracy là metric chính (theo yêu cầu cuộc thi Kaggle), đồng thời sử dụng F1-score, Precision và Recall làm metric phụ để đánh giá toàn diện hơn.
+
+\subsection{Mô hình Baseline}
+\label{subsec:baseline_models}
+
+\subsubsection{Logistic Regression}
+
+Logistic Regression là mô hình tuyến tính cho bài toán phân loại, sử dụng hàm sigmoid để ánh xạ đầu ra về xác suất:
+
+\begin{equation}
+\hat{y} = \sigma(\mathbf{w}^T\mathbf{x} + b) = \frac{1}{1 + e^{-(\mathbf{w}^T\mathbf{x} + b)}}
+\label{eq:logistic}
+\end{equation}
+
+trong đó $\mathbf{w}$ là vector trọng số, $\mathbf{x}$ là vector đặc trưng đầu vào, $b$ là bias. Hàm mất mát Binary Cross-Entropy được sử dụng để huấn luyện:
+
+\begin{equation}
+\mathcal{L} = -\frac{1}{N}\sum_{i=1}^{N}\left[y_i \log(\hat{y}_i) + (1 - y_i)\log(1 - \hat{y}_i)\right]
+\label{eq:bce}
+\end{equation}
+
+Hyperparameters: \texttt{C=1.0}, \texttt{max\_iter=1000}, \texttt{solver=`lbfgs'}.
+
+\subsubsection{Decision Tree}
+
+Decision Tree phân chia không gian đặc trưng bằng cách chọn ngưỡng split tối ưu tại mỗi node, sử dụng tiêu chí Gini Impurity hoặc Entropy:
+
+\begin{equation}
+\text{Gini}(t) = 1 - \sum_{k=1}^{K} p_k^2
+\label{eq:gini}
+\end{equation}
+
+\begin{equation}
+\text{Entropy}(t) = -\sum_{k=1}^{K} p_k \log_2 p_k
+\label{eq:entropy}
+\end{equation}
+
+trong đó $p_k$ là tỷ lệ mẫu thuộc lớp $k$ tại node $t$. Hyperparameters: \texttt{max\_depth=10}, \texttt{criterion=`gini'}.
+
+\subsubsection{Random Forest}
+
+Random Forest là mô hình ensemble kết hợp nhiều Decision Tree độc lập, mỗi cây được huấn luyện trên một tập con ngẫu nhiên (\textit{bootstrap}) của dữ liệu và đặc trưng. Kết quả dự đoán cuối cùng được xác định bằng bỏ phiếu đa số:
+
+\begin{equation}
+\hat{y} = \text{majority\_vote}\big(h_1(\mathbf{x}), h_2(\mathbf{x}), \ldots, h_T(\mathbf{x})\big)
+\label{eq:rf}
+\end{equation}
+
+trong đó $h_t(\mathbf{x})$ là dự đoán của cây thứ $t$ và $T$ là tổng số cây. Hyperparameters: \texttt{n\_estimators=200}, \texttt{max\_depth=None}.
+
+\subsubsection{Support Vector Machine (SVM)}
+
+SVM tìm siêu phẳng (\textit{hyperplane}) phân tách hai lớp với margin lớn nhất:
+
+\begin{equation}
+\min_{\mathbf{w}, b} \;\; \frac{1}{2}\|\mathbf{w}\|^2 \qquad \text{s.t.} \quad y_i(\mathbf{w}^T\mathbf{x}_i + b) \geq 1, \;\; \forall i
+\label{eq:svm}
+\end{equation}
+
+trong đó $\|\mathbf{w}\|^2$ đo độ phức tạp của mô hình (margin càng rộng khi $\|\mathbf{w}\|$ càng nhỏ). Hyperparameters: \texttt{kernel=`linear'}, \texttt{C=1.0}.
+
+\subsection{Mô hình nâng cao (Advanced Models)}
+\label{subsec:advanced_models}
+
+\subsubsection{XGBoost}
+
+XGBoost (\textit{eXtreme Gradient Boosting})~\cite{chen2016xgboost} là mô hình gradient boosting với hàm mục tiêu có chính quy hóa (\textit{regularization}):
+
+\begin{equation}
+\mathcal{L}(\theta) = \sum_{i=1}^{n} l(y_i, \hat{y}_i) + \sum_{k=1}^{K} \Omega(f_k), \qquad \Omega(f) = \gamma T + \frac{1}{2}\lambda\|\mathbf{w}\|^2
+\label{eq:xgboost}
+\end{equation}
+
+trong đó $l(y_i, \hat{y}_i)$ là hàm mất mát (Binary Cross-Entropy cho bài toán phân loại), $\Omega(f_k)$ là thành phần chính quy hóa của cây thứ $k$, $T$ là số lá, $\mathbf{w}$ là vector trọng số tại các lá, $\gamma$ kiểm soát số lá và $\lambda$ kiểm soát độ lớn trọng số.
+
+XGBoost sử dụng chiến lược \textbf{Level-wise Growth} --- mở rộng tất cả node cùng mức trước khi chuyển sang mức tiếp theo. Hyperparameters sau tuning: \texttt{max\_depth=4}, \texttt{learning\_rate=0.1}, \texttt{n\_estimators=250}.
+
+\subsubsection{LightGBM}
+
+LightGBM~\cite{ke2017lightgbm} cũng là mô hình gradient boosting nhưng sử dụng chiến lược tăng trưởng khác:
+
+\begin{equation}
+F_m(\mathbf{x}) = F_{m-1}(\mathbf{x}) + \eta \cdot h_m(\mathbf{x})
+\label{eq:lightgbm}
+\end{equation}
+
+trong đó $F_m(\mathbf{x})$ là dự đoán sau $m$ vòng boosting, $\eta$ là learning rate, $h_m(\mathbf{x})$ là cây quyết định yếu (\textit{weak learner}) tại vòng thứ $m$.
+
+Điểm khác biệt chính so với XGBoost: LightGBM sử dụng \textbf{Leaf-wise Growth} --- luôn mở rộng lá có loss reduction lớn nhất, dẫn đến cây sâu hơn nhưng ít đối xứng hơn. Phương pháp này thường hội tụ nhanh hơn nhưng dễ overfitting hơn nếu không giới hạn \texttt{num\_leaves}. Hyperparameters sau tuning: \texttt{num\_leaves=31}, \texttt{learning\_rate=0.05}, \texttt{n\_estimators=400}.

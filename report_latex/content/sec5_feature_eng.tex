@@ -1,0 +1,161 @@
+\section{Kỹ thuật đặc trưng (Feature Engineering)}
+\label{sec:feature_eng}
+
+\subsection{Mã hóa đặc trưng High Cardinality --- Target Encoding}
+\label{subsec:target_encoding}
+
+Ba đặc trưng phân loại \texttt{City}, \texttt{Profession} và \texttt{Degree} có số lượng category rất lớn (hàng chục đến hàng trăm giá trị unique), khiến One-Hot Encoding không khả thi vì sẽ tạo quá nhiều cột thưa. Nhóm áp dụng \textbf{Target Encoding} --- thay thế mỗi category bằng giá trị trung bình của biến mục tiêu trong category đó, kết hợp smoothing để giảm overfitting:
+
+\begin{equation}
+\text{TargetEnc}(c) = \frac{\displaystyle\sum_{i:\, x_i = c} y_i + \lambda \cdot \bar{y}}{n_c + \lambda}
+\label{eq:target_encoding}
+\end{equation}
+
+trong đó:
+\begin{itemize}[noitemsep]
+    \item $c$: category cần mã hóa
+    \item $n_c$: số lần category $c$ xuất hiện trong tập dữ liệu
+    \item $\bar{y}$: giá trị trung bình của biến mục tiêu trên toàn bộ tập dữ liệu (global mean)
+    \item $\lambda$: hệ số smoothing, kiểm soát mức độ ``co về'' global mean
+\end{itemize}
+
+Khi $n_c$ nhỏ (category hiếm), giá trị encoding bị kéo về $\bar{y}$ nhiều hơn, giúp tránh overfitting. Để ngăn ngừa data leakage, Target Encoding được thực hiện trong vòng lặp Cross-Validation: chỉ fit trên tập train của mỗi fold và transform trên tập validation.
+
+\subsection{Phân nhóm tuổi (Age Binning)}
+\label{subsec:age_binning}
+
+Dựa trên phân tích EDA (Mục~\ref{subsec:bivariate}), nhóm nhận thấy mối quan hệ giữa tuổi và trầm cảm không tuyến tính đơn thuần mà có sự khác biệt rõ rệt theo nhóm tuổi. Do đó, kỹ thuật \textit{Discretization/Binning} được áp dụng để chia \texttt{Age} thành 4 nhóm ordinal:
+
+\begin{itemize}[noitemsep]
+    \item Nhóm 0: 18--29 tuổi (tỷ lệ trầm cảm 57,0\%)
+    \item Nhóm 1: 30--42 tuổi (tỷ lệ trầm cảm 12,8\%)
+    \item Nhóm 2: 43--51 tuổi (tỷ lệ trầm cảm 1,7\%)
+    \item Nhóm 3: 52+ tuổi (tỷ lệ trầm cảm 0,3\%)
+\end{itemize}
+
+Hình~\ref{fig:age_group} minh họa sự khác biệt rất lớn về tỷ lệ trầm cảm giữa các nhóm tuổi: nhóm 18--29 có tỷ lệ gấp gần 200 lần so với nhóm 52+, đồng thời số lượng mẫu phân bố tương đối đồng đều giữa 4 nhóm (~32.000--38.000 mẫu/nhóm).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{feature_eng/age_group_vs_depression.png}
+\caption{Tỷ lệ Depression và số lượng mẫu theo nhóm tuổi (Age Binning)}
+\label{fig:age_group}
+\end{figure}
+
+\subsection{Tạo đặc trưng tương tác (Interaction Features)}
+\label{subsec:interaction_features}
+
+Dựa trên kết quả phân tích đa biến ở Mục~\ref{subsec:multivariate}, nhóm tạo thêm \textbf{7 đặc trưng tương tác} nhằm nắm bắt hiệu ứng kết hợp giữa nhiều yếu tố mà các đặc trưng gốc riêng lẻ không thể hiện được.
+
+\subsubsection{Các đặc trưng đo mức căng thẳng}
+
+\textbf{(1) Stress Load} --- đo mức tải stress tổng hợp từ áp lực và căng thẳng tài chính:
+\begin{equation}
+\text{stress\_load} = \text{Pressure} \times \text{Financial\_Stress}
+\label{eq:stress_load}
+\end{equation}
+
+\textbf{(2) Stress-Satisfaction Ratio} --- tỷ lệ giữa áp lực và mức hài lòng, phản ánh sự mất cân bằng tâm lý:
+\begin{equation}
+\text{stress\_satisfaction\_ratio} = \frac{\text{Pressure}}{\text{Satisfaction} + 1}
+\label{eq:stress_ratio}
+\end{equation}
+
+\textbf{(3) Hours-Pressure Ratio} --- đo tác động kết hợp giữa số giờ làm việc/học và áp lực:
+\begin{equation}
+\text{hours\_pressure\_ratio} = \text{Work/Study\_Hours} \times \text{Pressure}
+\label{eq:hours_pressure}
+\end{equation}
+
+\subsubsection{Các đặc trưng đo sức khỏe tổng thể}
+
+\textbf{(4) Wellbeing Index} --- chỉ số sức khỏe tổng thể dựa trên mức hài lòng và chất lượng giấc ngủ:
+\begin{equation}
+\text{wellbeing\_index} = \frac{\text{Satisfaction} + \text{Sleep\_Duration}}{2}
+\label{eq:wellbeing}
+\end{equation}
+
+\textbf{(5) Poor Sleep} --- biến nhị phân đánh dấu người có thời lượng ngủ kém nhất (dưới 5 giờ):
+\begin{equation}
+\text{poor\_sleep} = \begin{cases} 1 & \text{nếu Sleep\_Duration} = 0 \text{ (Less than 5 hours)} \\ 0 & \text{ngược lại} \end{cases}
+\label{eq:poor_sleep}
+\end{equation}
+
+\subsubsection{Các đặc trưng đo yếu tố rủi ro}
+
+\textbf{(6) CGPA-Pressure} --- đo tác động kết hợp giữa điểm trung bình tích lũy và áp lực, chỉ áp dụng cho sinh viên:
+\begin{equation}
+\text{cgpa\_pressure} = \text{CGPA} \times \text{Pressure} \times \text{has\_cgpa}
+\label{eq:cgpa_pressure}
+\end{equation}
+
+trong đó $\text{has\_cgpa} = 1$ nếu đối tượng là sinh viên, $\text{has\_cgpa} = 0$ nếu là người đi làm (khi đó $\text{cgpa\_pressure} = 0$, loại bỏ tín hiệu CGPA không có ý nghĩa).
+
+\textbf{(7) Risk Score} --- chỉ số rủi ro cộng gộp từ hai yếu tố cảnh báo mạnh nhất được phát hiện trong EDA:
+\begin{equation}
+\text{risk\_score} = \text{Suicidal\_Thoughts} + \text{Family\_History}
+\label{eq:risk_score}
+\end{equation}
+
+Giá trị 0 = không có yếu tố rủi ro nào; 1 = có một yếu tố; 2 = có cả hai yếu tố.
+
+\subsubsection{Tổng hợp và đánh giá}
+
+Bảng~\ref{tab:interaction_features} tóm tắt toàn bộ 7 đặc trưng tương tác cùng ý nghĩa miền (\textit{domain meaning}).
+
+\begin{table}[H]
+\centering
+\caption{Tổng hợp 7 đặc trưng tương tác được tạo}
+\label{tab:interaction_features}
+\small
+\begin{tabular}{clp{7cm}}
+\toprule
+\textbf{\#} & \textbf{Tên đặc trưng} & \textbf{Ý nghĩa miền (Domain Meaning)} \\
+\midrule
+1 & stress\_load & Tải stress tổng hợp (áp lực $\times$ tài chính) \\
+2 & stress\_satisfaction\_ratio & Mất cân bằng giữa áp lực và hài lòng \\
+3 & hours\_pressure\_ratio & Quá tải công việc/học tập \\
+4 & wellbeing\_index & Chỉ số sức khỏe tổng thể \\
+5 & poor\_sleep & Cờ ngủ kém (nhị phân) \\
+6 & cgpa\_pressure & Áp lực học thuật của sinh viên \\
+7 & risk\_score & Mức rủi ro kép (tự tử + tiền sử) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hình~\ref{fig:interaction_cont} minh họa phân phối các đặc trưng tương tác liên tục và mối quan hệ với Depression. Nhóm trầm cảm có giá trị \texttt{stress\_load}, \texttt{stress\_satisfaction\_ratio} và \texttt{hours\_pressure\_ratio} cao hơn rõ rệt, trong khi \texttt{wellbeing\_index} thấp hơn --- phù hợp với kỳ vọng từ kiến thức y học.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth, height=0.85\textheight, keepaspectratio]{feature_eng/interaction_continuous_vs_depression.png}
+\caption{Phân phối và boxplot các đặc trưng tương tác liên tục theo Depression}
+\label{fig:interaction_cont}
+\end{figure}
+
+\clearpage
+
+Hình~\ref{fig:interaction_disc} cho thấy hai đặc trưng rời rạc cũng có khả năng phân biệt tốt. Đặc biệt, \texttt{risk\_score} cho thấy hiệu ứng ``dose-response'' rõ ràng: khi score = 0, tỷ lệ trầm cảm chỉ 4,7\%; khi score = 1 là 17,9\%; và khi score = 2 (cả hai yếu tố rủi ro đều có) lên tới 32,6\%. Tương tự, \texttt{poor\_sleep} = 1 cũng liên quan đến tỷ lệ trầm cảm cao hơn.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{feature_eng/interaction_discrete_vs_depression.png}
+\caption{Tỷ lệ Depression theo poor\_sleep và risk\_score}
+\label{fig:interaction_disc}
+\end{figure}
+
+
+\subsection{Lựa chọn đặc trưng (Feature Selection)}
+\label{subsec:feature_selection}
+
+Để đánh giá tầm quan trọng của các đặc trưng (bao gồm cả đặc trưng gốc và đặc trưng mới tạo), nhóm sử dụng \textbf{Random Forest Feature Importance} --- đo mức giảm Gini Impurity trung bình khi split trên mỗi đặc trưng.
+
+Hình~\ref{fig:feat_importance_rf} cho thấy kết quả xếp hạng: \texttt{Age} (0,17) và \texttt{age\_group} (0,13) là hai đặc trưng quan trọng nhất, tiếp theo là \texttt{Suicidal Thoughts} (0,11), \texttt{cgpa\_pressure} (0,10) và \texttt{Profession\_te} (0,07). Đáng chú ý, các đặc trưng tương tác mới tạo (\texttt{stress\_load}, \texttt{cgpa\_pressure}, \texttt{stress\_satisfaction\_ratio}) đều nằm trong top 10, xác nhận giá trị của bước Feature Engineering.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{feature_eng/feat_importance.png}
+\caption{Random Forest Feature Importance --- xếp hạng toàn bộ đặc trưng}
+\label{fig:feat_importance_rf}
+\end{figure}
+
+Kết luận: nhóm giữ lại toàn bộ đặc trưng có importance $> 0$ (tổng cộng 25 đặc trưng) để đưa vào huấn luyện mô hình, vì các mô hình tree-based có khả năng tự chọn đặc trưng quan trọng trong quá trình học.

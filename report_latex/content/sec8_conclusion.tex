@@ -1,0 +1,34 @@
+\section{Kết luận và hướng phát triển}
+\label{sec:conclusion}
+
+\subsection{Kết luận}
+
+Trong đồ án này, nhóm đã xây dựng thành công một pipeline hoàn chỉnh cho bài toán dự đoán rủi ro trầm cảm (\textit{Depression Risk Prediction}) dựa trên dữ liệu khảo sát sức khỏe tâm thần từ cuộc thi Kaggle. Các kết quả chính bao gồm:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Pipeline xử lý dữ liệu toàn diện}: Xây dựng quy trình 6 bước từ khám phá dữ liệu, tiền xử lý (xử lý noisy data, MNAR missing values, merge conditional columns), kỹ thuật đặc trưng (Target Encoding, Age Binning, Interaction Features), đến đánh giá mô hình.
+    
+    \item \textbf{Hiệu suất cao}: Mô hình XGBoost (tuned) đạt \textbf{Accuracy = 93,96\%}, \textbf{F1-score = 0,8312} và \textbf{AUC = 0,9751} trên 5-Fold Stratified Cross-Validation. Kết quả này vượt trội so với các mô hình baseline (Logistic Regression, Decision Tree, Random Forest, SVM).
+    
+    \item \textbf{Khám phá tri thức có giá trị}: Phân tích SHAP cho thấy ba yếu tố ảnh hưởng mạnh nhất đến rủi ro trầm cảm là: \textbf{Tuổi} (người trẻ 18--30 có rủi ro cao nhất), \textbf{Suy nghĩ tự tử} (yếu tố cảnh báo mạnh nhất), và \textbf{Áp lực học tập/công việc kết hợp căng thẳng tài chính}. Các phát hiện này phù hợp với kiến thức y học và có thể hỗ trợ công tác sàng lọc sức khỏe tâm thần.
+    
+    \item \textbf{Khả năng giải thích}: Nhờ SHAP Waterfall, mô hình có thể giải thích lý do dự đoán cho từng cá nhân cụ thể, tăng tính minh bạch và khả năng ứng dụng thực tế.
+\end{enumerate}
+
+\subsection{Hướng phát triển}
+
+Dựa trên các hạn chế đã nhận diện, nhóm đề xuất các hướng phát triển trong tương lai:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Xử lý mất cân bằng dữ liệu}: Thử nghiệm các kỹ thuật như SMOTE (\textit{Synthetic Minority Over-sampling Technique}), ADASYN, hoặc class weighting để cải thiện Recall cho lớp thiểu số (Depression = 1).
+    
+    \item \textbf{Mô hình Deep Learning}: Khám phá các kiến trúc chuyên biệt cho dữ liệu dạng bảng như TabNet, FT-Transformer, hoặc Multi-Layer Perceptron (MLP) với dropout và batch normalization.
+    
+    \item \textbf{Ensemble nâng cao}: Kết hợp nhiều mô hình khác nhau (stacking, blending) để tận dụng điểm mạnh của từng mô hình thành phần.
+    
+    \item \textbf{Thu thập dữ liệu thực tế}: Thay thế dữ liệu synthetic bằng dữ liệu khảo sát thực tế, bổ sung thêm các yếu tố kinh tế -- xã hội, khí hậu, và lịch sử điều trị.
+    
+    \item \textbf{Triển khai ứng dụng}: Xây dựng ứng dụng web hoặc mobile cho phép nhập thông tin cá nhân và nhận kết quả sàng lọc trầm cảm nhanh, hỗ trợ bác sĩ và chuyên gia tâm lý trong quy trình đánh giá ban đầu.
+    
+    \item \textbf{Tối ưu ngưỡng phân loại}: Thay vì sử dụng ngưỡng mặc định 0,5, áp dụng threshold tuning dựa trên chi phí sai lầm (\textit{cost-sensitive learning}) để ưu tiên giảm False Negative trong bối cảnh y tế.
+\end{enumerate}
